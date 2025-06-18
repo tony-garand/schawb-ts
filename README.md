@@ -1,87 +1,89 @@
-# `schwab-ts`: A Charles Schwab API Wrapper for TypeScript/Node.js
-[![npm version](https://badge.fury.io/js/schwab-ts.svg)](https://badge.fury.io/js/schwab-ts)
-[![Build Status](https://github.com/tony-garand/schwab-ts/workflows/tests/badge.svg)](https://github.com/yourusername/schwab-ts/actions?query=workflow%3Atests)
-[![Coverage](https://codecov.io/gh/tony-garand/schwab-ts/branch/main/graph/badge.svg)](https://codecov.io/gh/tony-garand/schwab-ts)
+# Schwab TypeScript Client
 
-## What is `schwab-ts`?
+A TypeScript client for the Schwab API, providing a modern and type-safe way to interact with Schwab's trading platform.
 
-`schwab-ts` is an unofficial TypeScript/Node.js wrapper around the Charles Schwab Consumer APIs. It provides a type-safe and modern interface to interact with Schwab's trading platform. Notable functionality includes:
+## Features
 
-* Login and authentication
-* Quotes, fundamentals, and historical pricing data
-* Options chains
-* Streaming quotes and order book depth data
-* Trades and trade management
-* Account info
+- Full TypeScript support with type definitions
+- Modern async/await API
+- WebSocket streaming support
+- OAuth2 authentication
+- Comprehensive error handling
+- Built-in logging and debugging utilities
 
 ## Installation
 
 ```bash
 npm install schwab-ts
-# or
-yarn add schwab-ts
 ```
 
-## Quick Start
-
-Before you begin, you'll need to:
-1. Create an account on the [Charles Schwab developer site](https://developer.schwab.com/login)
-2. Create an application to receive your API key and app secret
-3. Note your callback URI for the OAuth flow
-4. Wait for Schwab to approve your application (this can take several days)
-
-Here's a quick example of how to use the library:
+## Usage
 
 ```typescript
-import { SchwabClient } from 'schwab-ts';
+import { easyClient } from 'schwab-ts';
 
-const client = new SchwabClient({
-  apiKey: 'YOUR_API_KEY',
-  appSecret: 'YOUR_APP_SECRET',
-  callbackUrl: 'https://127.0.0.1:8182/',
-  tokenPath: '/path/to/token.json'
-});
+async function main() {
+  const client = await easyClient(
+    'YOUR_API_KEY',
+    'YOUR_APP_SECRET',
+    'https://127.0.0.1:8182',
+    './token.json'
+  );
 
-// Get historical price data for Apple
-const priceHistory = await client.getPriceHistory({
-  symbol: 'AAPL',
-  periodType: 'day',
-  period: 1,
-  frequencyType: 'daily',
-  frequency: 1
-});
+  // Use the client to interact with Schwab's API
+  const account = await client.getAccount();
+  console.log('Account:', account);
+}
 
-console.log(priceHistory);
+main().catch(console.error);
 ```
 
-## Features
+## Development
 
-1. **Type Safety**: Full TypeScript support with comprehensive type definitions
-2. **Modern Async/Await**: Built with modern JavaScript/TypeScript features
-3. **Safe Authentication**: Handles OAuth token management and refresh flows
-4. **Minimal API Wrapping**: Direct access to Schwab's API with minimal abstraction
-5. **Streaming Support**: Real-time data streaming capabilities
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/schwab-ts.git
+cd schwab-ts
+```
 
-## Limitations
+2. Install dependencies:
+```bash
+npm install
+```
 
-While Schwab's API is powerful, there are some limitations to be aware of:
+3. Build the project:
+```bash
+npm run build
+```
 
-* This API is unaffiliated with thinkorswim (TOS). While you can access the same accounts, some TOS features are not available
-* Paper trading is not supported
-* Historical options pricing data is not available
+4. Run tests:
+```bash
+npm test
+```
+
+5. Lint the code:
+```bash
+npm run lint
+```
+
+6. Format the code:
+```bash
+npm run format
+```
 
 ## Contributing
 
-We welcome contributions! Please feel free to submit issues and pull requests.
-
-## Support
-
-Join our [Discord server](https://discord.gg/BEr6y6Xqyv) for help and discussion.
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Disclaimer
+## Acknowledgments
 
-*schwab-ts is an unofficial API wrapper. It is in no way endorsed by or affiliated with Charles Schwab or any associated organization. Make sure to read and understand the terms of service of the underlying API before using this package. The authors accept no responsibility for any damage that might stem from use of this package.*
+- Original Python client by [schwab-py](https://github.com/tony-garand/schwab-py)
+- TypeScript conversion and improvements by Anthony Garand
