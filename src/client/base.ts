@@ -7,10 +7,12 @@ export class BaseClient {
   protected logger: Console = console;
   protected requestNumber: number = 0;
   protected tokenMetadata: any;
+  protected enforceEnums: boolean;
 
   constructor(apiKey: string, session: any, enforceEnums: boolean = true, tokenMetadata?: any) {
     this.apiKey = apiKey;
     this.session = session;
+    this.enforceEnums = enforceEnums;
     this.tokenMetadata = tokenMetadata;
     // TODO: Add more initialization as needed
   }
@@ -25,16 +27,16 @@ export class BaseClient {
   }
 
   // Placeholder for HTTP methods to be implemented in subclasses
-  async _getRequest(path: string, params: Record<string, any>): Promise<Response> {
+  async _getRequest(_path: string, _params: Record<string, any>): Promise<Response> {
     throw new Error('Not implemented');
   }
-  async _postRequest(path: string, data: any): Promise<Response> {
+  async _postRequest(_path: string, _data: any): Promise<Response> {
     throw new Error('Not implemented');
   }
-  async _putRequest(path: string, data: any): Promise<Response> {
+  async _putRequest(_path: string, _data: any): Promise<Response> {
     throw new Error('Not implemented');
   }
-  async _deleteRequest(path: string): Promise<Response> {
+  async _deleteRequest(_path: string): Promise<Response> {
     throw new Error('Not implemented');
   }
 } 
