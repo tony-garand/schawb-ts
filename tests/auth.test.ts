@@ -33,8 +33,8 @@ describe('ClientFromLoginFlowTest', () => {
     beforeEach(() => {
         tmpDir = '/tmp/test-dir';
         tokenPath = `${tmpDir}/token.json`;
-        jest.spyOn(fs, 'mkdir').mockResolvedValue(undefined as unknown as void);
-        jest.spyOn(fs, 'writeFile').mockResolvedValue(undefined as unknown as void);
+        jest.spyOn(fs, 'mkdir').mockResolvedValue(undefined as any);
+        jest.spyOn(fs, 'writeFile').mockResolvedValue(undefined as any);
         jest.spyOn(fs, 'readFile').mockResolvedValue(JSON.stringify(mockTokenWithMetadata));
         jest.spyOn(Date, 'now').mockReturnValue(MOCK_NOW * 1000);
         (crypto.randomBytes as jest.Mock).mockReturnValue(Buffer.from('test-state'));
@@ -130,8 +130,8 @@ describe('ClientFromTokenFileTest', () => {
     beforeEach(() => {
         tmpDir = '/tmp/test-dir';
         tokenPath = `${tmpDir}/token.json`;
-        jest.spyOn(fs, 'mkdir').mockResolvedValue(undefined as unknown as void);
-        jest.spyOn(fs, 'writeFile').mockResolvedValue(undefined as unknown as void);
+        jest.spyOn(fs, 'mkdir').mockResolvedValue(undefined as any);
+        jest.spyOn(fs, 'writeFile').mockResolvedValue(undefined as any);
         jest.spyOn(fs, 'readFile').mockResolvedValue(JSON.stringify(mockTokenWithMetadata));
         jest.spyOn(Date, 'now').mockReturnValue(MOCK_NOW * 1000);
     });
@@ -141,19 +141,19 @@ describe('ClientFromTokenFileTest', () => {
     });
 
     test('no_such_file', async () => {
-        (fs.readFile as jest.Mock).mockRejectedValue(new Error('ENOENT'));
+        (fs.readFile as any).mockRejectedValue(new Error('ENOENT'));
         await expect(clientFromTokenFile(tokenPath, API_KEY, APP_SECRET))
             .rejects.toThrow('ENOENT');
     });
 
     test('json_loads', async () => {
-        (fs.readFile as jest.Mock).mockResolvedValue('invalid json');
+        (fs.readFile as any).mockResolvedValue('invalid json');
         await expect(clientFromTokenFile(tokenPath, API_KEY, APP_SECRET))
             .rejects.toThrow('Unexpected token');
     });
 
     test('update_token_updates_token', async () => {
-        const mockClient = new Client();
+        const mockClient = new Client(API_KEY, {}, true);
         (Client as jest.Mock).mockReturnValue(mockClient);
         const client = await clientFromTokenFile(tokenPath, API_KEY, APP_SECRET);
         expect(client).toBe(mockClient);
@@ -174,7 +174,7 @@ describe('ClientFromTokenFileTest', () => {
     });
 
     test('enforce_enums_being_disabled', async () => {
-        const mockClient = new Client();
+        const mockClient = new Client(API_KEY, {}, false);
         (Client as jest.Mock).mockReturnValue(mockClient);
         const client = await clientFromTokenFile(tokenPath, API_KEY, APP_SECRET, { enforceEnums: false });
         expect(client).toBe(mockClient);
@@ -182,7 +182,7 @@ describe('ClientFromTokenFileTest', () => {
     });
 
     test('enforce_enums_being_enabled', async () => {
-        const mockClient = new Client();
+        const mockClient = new Client(API_KEY, {}, true);
         (Client as jest.Mock).mockReturnValue(mockClient);
         const client = await clientFromTokenFile(tokenPath, API_KEY, APP_SECRET, { enforceEnums: true });
         expect(client).toBe(mockClient);
@@ -191,12 +191,12 @@ describe('ClientFromTokenFileTest', () => {
 });
 
 describe('ClientFromAccessFunctionsTest', () => {
-    let tokenReadFunc: jest.MockedFunction<() => Promise<any>>;
-    let tokenWriteFunc: jest.MockedFunction<(token: any) => Promise<void>>;
+    let tokenReadFunc: any;
+    let tokenWriteFunc: any;
 
     beforeEach(() => {
-        tokenReadFunc = jest.fn().mockResolvedValue(mockTokenWithMetadata);
-        tokenWriteFunc = jest.fn().mockResolvedValue(undefined);
+        tokenReadFunc = (jest.fn() as any).mockResolvedValue(mockTokenWithMetadata);
+        tokenWriteFunc = (jest.fn() as any).mockResolvedValue(undefined);
         jest.spyOn(Date, 'now').mockReturnValue(MOCK_NOW * 1000);
     });
 
@@ -205,7 +205,7 @@ describe('ClientFromAccessFunctionsTest', () => {
     });
 
     test('success_with_write_func', async () => {
-        const mockClient = new Client();
+        const mockClient = new Client(API_KEY, {}, true);
         (Client as jest.Mock).mockReturnValue(mockClient);
         const client = await clientFromAccessFunctions(
             API_KEY,
@@ -218,7 +218,7 @@ describe('ClientFromAccessFunctionsTest', () => {
     });
 
     test('success_with_write_func_metadata_aware_token', async () => {
-        const mockClient = new Client();
+        const mockClient = new Client(API_KEY, {}, true);
         (Client as jest.Mock).mockReturnValue(mockClient);
         const client = await clientFromAccessFunctions(
             API_KEY,
@@ -231,7 +231,7 @@ describe('ClientFromAccessFunctionsTest', () => {
     });
 
     test('success_with_enforce_enums_disabled', async () => {
-        const mockClient = new Client();
+        const mockClient = new Client(API_KEY, {}, false);
         (Client as jest.Mock).mockReturnValue(mockClient);
         const client = await clientFromAccessFunctions(
             API_KEY,
@@ -244,7 +244,7 @@ describe('ClientFromAccessFunctionsTest', () => {
     });
 
     test('success_with_enforce_enums_enabled', async () => {
-        const mockClient = new Client();
+        const mockClient = new Client(API_KEY, {}, true);
         (Client as jest.Mock).mockReturnValue(mockClient);
         const client = await clientFromAccessFunctions(
             API_KEY,
@@ -259,13 +259,13 @@ describe('ClientFromAccessFunctionsTest', () => {
 
 describe('TokenMetadataTest', () => {
     test('from_loaded_token', async () => {
-        const tokenWriteFunc: jest.MockedFunction<(token: any) => Promise<void>> = jest.fn().mockResolvedValue(undefined);
+        const tokenWriteFunc = (jest.fn() as any).mockResolvedValue(undefined);
         const metadata = await TokenMetadata.fromLoadedToken(mockTokenWithMetadata, tokenWriteFunc);
         expect(metadata).toBeInstanceOf(TokenMetadata);
     });
 
     test('wrapped_token_write_func_updates_stored_token', async () => {
-        const tokenWriteFunc: jest.MockedFunction<(token: any) => Promise<void>> = jest.fn().mockResolvedValue(undefined);
+        const tokenWriteFunc = (jest.fn() as any).mockResolvedValue(undefined);
         const metadata = new TokenMetadata(mockToken, TOKEN_CREATION_TIMESTAMP, tokenWriteFunc);
         const wrappedFunc = metadata.wrappedTokenWriteFunc();
         await wrappedFunc({ new: 'token' });
@@ -276,13 +276,13 @@ describe('TokenMetadataTest', () => {
     });
 
     test('reject_tokens_without_creation_timestamp', async () => {
-        const tokenWriteFunc: jest.MockedFunction<(token: any) => Promise<void>> = jest.fn().mockResolvedValue(undefined);
+        const tokenWriteFunc = (jest.fn() as any).mockResolvedValue(undefined);
         await expect(TokenMetadata.fromLoadedToken({ token: 'yes' }, tokenWriteFunc))
             .rejects.toThrow('WARNING: The token format has changed');
     });
 
     test('token_age', () => {
-        const tokenWriteFunc: jest.MockedFunction<(token: any) => Promise<void>> = jest.fn().mockResolvedValue(undefined);
+        const tokenWriteFunc = (jest.fn() as any).mockResolvedValue(undefined);
         const metadata = new TokenMetadata(mockToken, TOKEN_CREATION_TIMESTAMP, tokenWriteFunc);
         expect(metadata.tokenAge()).toBe(MOCK_NOW - TOKEN_CREATION_TIMESTAMP);
     });

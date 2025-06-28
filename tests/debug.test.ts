@@ -118,14 +118,14 @@ describe('RegisterRedactions', () => {
   test('register from request success', () => {
     const registerRedactionsMock = jest.fn();
     const resp = new MockResponse({ success: 1 }, 200);
-    registerRedactionsFromResponse(resp);
+    registerRedactionsFromResponse(resp as any);
     expect(registerRedactionsMock).not.toHaveBeenCalled();
   });
 
   test('register from request not okay', () => {
     const registerRedactionsMock = jest.fn();
     const resp = new MockResponse({ success: 1 }, 403);
-    registerRedactionsFromResponse(resp);
+    registerRedactionsFromResponse(resp as any);
     expect(registerRedactionsMock).not.toHaveBeenCalled();
   });
 
@@ -135,7 +135,7 @@ describe('RegisterRedactions', () => {
     resp.json = jest.fn().mockImplementation(() => {
       throw new Error('Invalid JSON');
     });
-    registerRedactionsFromResponse(resp);
+    registerRedactionsFromResponse(resp as any);
     expect(registerRedactionsMock).not.toHaveBeenCalled();
   });
 });

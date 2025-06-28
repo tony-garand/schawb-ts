@@ -94,4 +94,28 @@ export class Client extends BaseClient {
   async placeOrder(accountHash: string, orderSpec: any): Promise<Response> {
     return this._postRequest(`/trader/v1/accounts/${accountHash}/orders`, orderSpec);
   }
+
+  async replaceOrder(orderId: string | number, accountHash: string, orderSpec: any): Promise<Response> {
+    return this._putRequest(`/trader/v1/accounts/${accountHash}/orders/${orderId}`, orderSpec);
+  }
+
+  async previewOrder(accountHash: string, orderSpec: any): Promise<Response> {
+    return this._postRequest(`/trader/v1/accounts/${accountHash}/previewOrder`, orderSpec);
+  }
+
+  // Utility methods
+  setTimeout(timeout: any): void {
+    this.session.timeout = timeout;
+  }
+
+  tokenAge(): number {
+    if (this.tokenMetadata && typeof this.tokenMetadata.tokenAge === 'function') {
+      return this.tokenMetadata.tokenAge();
+    }
+    return 0;
+  }
+
+  setEnforceEnums(enforce: boolean): void {
+    this.enforceEnums = enforce;
+  }
 } 

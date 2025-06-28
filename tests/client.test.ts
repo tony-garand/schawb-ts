@@ -44,8 +44,7 @@ describe('Client', () => {
             delete: jest.fn(),
             timeout: undefined
         };
-        client = new Client(API_KEY, mockSession);
-        client.logger.setLevel('debug');
+        client = new Client(API_KEY, mockSession, true);
     });
 
     const makeUrl = (path: string): string => {
@@ -64,24 +63,24 @@ describe('Client', () => {
     };
 
     describe('Generic functionality', () => {
-        test('set_timeout', () => {
+        test('setTimeout', () => {
             const timeout = 'dummy';
-            client.set_timeout(timeout);
+            client.setTimeout(timeout);
             expect(mockSession.timeout).toBe(timeout);
         });
 
-        test('token_age', () => {
+        test('tokenAge', () => {
             const tokenMetadata = {
-                token_age: jest.fn().mockReturnValue(1000)
+                tokenAge: jest.fn().mockReturnValue(1000)
             };
-            const client = new Client(API_KEY, mockSession, { token_metadata: tokenMetadata });
-            expect(client.token_age()).toBe(1000);
+            const client = new Client(API_KEY, mockSession, true, tokenMetadata);
+            expect(client.tokenAge()).toBe(1000);
         });
     });
 
-    describe('get_account', () => {
+    describe('getAccount', () => {
         test('basic', () => {
-            client.get_account(ACCOUNT_HASH);
+            client.getAccount(ACCOUNT_HASH);
             expect(mockSession.get).toHaveBeenCalledWith(
                 makeUrl('/trader/v1/accounts/{accountHash}'),
                 { params: {} }
@@ -89,7 +88,7 @@ describe('Client', () => {
         });
 
         test('with fields', () => {
-            client.get_account(ACCOUNT_HASH, { fields: [Client.Account.Fields.POSITIONS] });
+            client.getAccount(ACCOUNT_HASH, { fields: ['positions'] });
             expect(mockSession.get).toHaveBeenCalledWith(
                 makeUrl('/trader/v1/accounts/{accountHash}'),
                 { params: { fields: 'positions' } }
@@ -97,7 +96,7 @@ describe('Client', () => {
         });
 
         test('with fields scalar', () => {
-            client.get_account(ACCOUNT_HASH, { fields: Client.Account.Fields.POSITIONS });
+            client.getAccount(ACCOUNT_HASH, { fields: 'positions' });
             expect(mockSession.get).toHaveBeenCalledWith(
                 makeUrl('/trader/v1/accounts/{accountHash}'),
                 { params: { fields: 'positions' } }
@@ -105,8 +104,8 @@ describe('Client', () => {
         });
 
         test('with fields unchecked', () => {
-            client.set_enforce_enums(false);
-            client.get_account(ACCOUNT_HASH, { fields: ['positions'] });
+            client.setEnforceEnums(false);
+            client.getAccount(ACCOUNT_HASH, { fields: ['positions'] });
             expect(mockSession.get).toHaveBeenCalledWith(
                 makeUrl('/trader/v1/accounts/{accountHash}'),
                 { params: { fields: 'positions' } }
@@ -114,9 +113,9 @@ describe('Client', () => {
         });
     });
 
-    describe('get_account_numbers', () => {
+    describe('getAccountNumbers', () => {
         test('basic', () => {
-            client.get_account_numbers();
+            client.getAccountNumbers();
             expect(mockSession.get).toHaveBeenCalledWith(
                 makeUrl('/trader/v1/accounts/accountNumbers'),
                 { params: {} }
@@ -124,9 +123,9 @@ describe('Client', () => {
         });
     });
 
-    describe('get_accounts', () => {
+    describe('getAccounts', () => {
         test('basic', () => {
-            client.get_accounts();
+            client.getAccounts();
             expect(mockSession.get).toHaveBeenCalledWith(
                 makeUrl('/trader/v1/accounts'),
                 { params: {} }
@@ -134,7 +133,7 @@ describe('Client', () => {
         });
 
         test('with fields', () => {
-            client.get_accounts({ fields: [Client.Account.Fields.POSITIONS] });
+            client.getAccounts({ fields: ['positions'] });
             expect(mockSession.get).toHaveBeenCalledWith(
                 makeUrl('/trader/v1/accounts'),
                 { params: { fields: 'positions' } }
@@ -142,7 +141,7 @@ describe('Client', () => {
         });
 
         test('with fields scalar', () => {
-            client.get_accounts({ fields: Client.Account.Fields.POSITIONS });
+            client.getAccounts({ fields: 'positions' });
             expect(mockSession.get).toHaveBeenCalledWith(
                 makeUrl('/trader/v1/accounts'),
                 { params: { fields: 'positions' } }
@@ -150,8 +149,8 @@ describe('Client', () => {
         });
 
         test('with fields unchecked', () => {
-            client.set_enforce_enums(false);
-            client.get_accounts({ fields: ['positions'] });
+            client.setEnforceEnums(false);
+            client.getAccounts({ fields: ['positions'] });
             expect(mockSession.get).toHaveBeenCalledWith(
                 makeUrl('/trader/v1/accounts'),
                 { params: { fields: 'positions' } }
@@ -159,9 +158,9 @@ describe('Client', () => {
         });
     });
 
-    describe('get_order', () => {
+    describe('getOrder', () => {
         test('basic', () => {
-            client.get_order(ORDER_ID, ACCOUNT_HASH);
+            client.getOrder(ORDER_ID, ACCOUNT_HASH);
             expect(mockSession.get).toHaveBeenCalledWith(
                 makeUrl('/trader/v1/accounts/{accountHash}/orders/{orderId}'),
                 { params: {} }
@@ -169,7 +168,7 @@ describe('Client', () => {
         });
 
         test('with string parameters', () => {
-            client.get_order(ORDER_ID.toString(), ACCOUNT_HASH.toString());
+            client.getOrder(ORDER_ID.toString(), ACCOUNT_HASH.toString());
             expect(mockSession.get).toHaveBeenCalledWith(
                 makeUrl('/trader/v1/accounts/{accountHash}/orders/{orderId}'),
                 { params: {} }
@@ -177,25 +176,25 @@ describe('Client', () => {
         });
     });
 
-    describe('cancel_order', () => {
+    describe('cancelOrder', () => {
         test('basic', () => {
-            client.cancel_order(ORDER_ID, ACCOUNT_HASH);
+            client.cancelOrder(ORDER_ID, ACCOUNT_HASH);
             expect(mockSession.delete).toHaveBeenCalledWith(
                 makeUrl('/trader/v1/accounts/{accountHash}/orders/{orderId}')
             );
         });
 
         test('with string parameters', () => {
-            client.cancel_order(ORDER_ID.toString(), ACCOUNT_HASH.toString());
+            client.cancelOrder(ORDER_ID.toString(), ACCOUNT_HASH.toString());
             expect(mockSession.delete).toHaveBeenCalledWith(
                 makeUrl('/trader/v1/accounts/{accountHash}/orders/{orderId}')
             );
         });
     });
 
-    describe('get_orders_for_account', () => {
+    describe('getOrdersForAccount', () => {
         test('vanilla', () => {
-            client.get_orders_for_account(ACCOUNT_HASH);
+            client.getOrdersForAccount(ACCOUNT_HASH);
             expect(mockSession.get).toHaveBeenCalledWith(
                 makeUrl('/trader/v1/accounts/{accountHash}/orders'),
                 {
@@ -209,19 +208,19 @@ describe('Client', () => {
 
         test('from_not_datetime', () => {
             expect(() => {
-                client.get_orders_for_account(ACCOUNT_HASH, { from_entered_datetime: '2020-01-02' as any });
-            }).toThrow("expected type in (Date) for from_entered_datetime, got 'string'");
+                client.getOrdersForAccount(ACCOUNT_HASH, { fromEnteredTime: '2020-01-02' as any });
+            }).toThrow("expected type in (Date) for fromEnteredTime, got 'string'");
         });
 
         test('to_not_datetime', () => {
             expect(() => {
-                client.get_orders_for_account(ACCOUNT_HASH, { to_entered_datetime: '2020-01-02' as any });
-            }).toThrow("expected type in (Date) for to_entered_datetime, got 'string'");
+                client.getOrdersForAccount(ACCOUNT_HASH, { toEnteredTime: '2020-01-02' as any });
+            }).toThrow("expected type in (Date) for toEnteredTime, got 'string'");
         });
 
         test('from_entered_datetime', () => {
             const fromDate = new Date('2019-12-01T00:00:00Z');
-            client.get_orders_for_account(ACCOUNT_HASH, { from_entered_datetime: fromDate });
+            client.getOrdersForAccount(ACCOUNT_HASH, { fromEnteredTime: fromDate });
             expect(mockSession.get).toHaveBeenCalledWith(
                 makeUrl('/trader/v1/accounts/{accountHash}/orders'),
                 {
@@ -235,7 +234,7 @@ describe('Client', () => {
 
         test('to_entered_datetime', () => {
             const toDate = new Date('2019-12-31T23:59:59Z');
-            client.get_orders_for_account(ACCOUNT_HASH, { to_entered_datetime: toDate });
+            client.getOrdersForAccount(ACCOUNT_HASH, { toEnteredTime: toDate });
             expect(mockSession.get).toHaveBeenCalledWith(
                 makeUrl('/trader/v1/accounts/{accountHash}/orders'),
                 {
@@ -248,7 +247,7 @@ describe('Client', () => {
         });
 
         test('max_results', () => {
-            client.get_orders_for_account(ACCOUNT_HASH, { max_results: 100 });
+            client.getOrdersForAccount(ACCOUNT_HASH, { maxResults: 100 });
             expect(mockSession.get).toHaveBeenCalledWith(
                 makeUrl('/trader/v1/accounts/{accountHash}/orders'),
                 {
@@ -262,7 +261,7 @@ describe('Client', () => {
         });
 
         test('status', () => {
-            client.get_orders_for_account(ACCOUNT_HASH, { status: Client.Order.Status.FILLED });
+            client.getOrdersForAccount(ACCOUNT_HASH, { status: 'FILLED' });
             expect(mockSession.get).toHaveBeenCalledWith(
                 makeUrl('/trader/v1/accounts/{accountHash}/orders'),
                 {
@@ -276,8 +275,8 @@ describe('Client', () => {
         });
 
         test('multiple_statuses', () => {
-            client.get_orders_for_account(ACCOUNT_HASH, {
-                status: [Client.Order.Status.FILLED, Client.Order.Status.REJECTED]
+            client.getOrdersForAccount(ACCOUNT_HASH, {
+                status: ['FILLED', 'REJECTED']
             });
             expect(mockSession.get).toHaveBeenCalledWith(
                 makeUrl('/trader/v1/accounts/{accountHash}/orders'),
@@ -292,8 +291,8 @@ describe('Client', () => {
         });
 
         test('status_unchecked', () => {
-            client.set_enforce_enums(false);
-            client.get_orders_for_account(ACCOUNT_HASH, { status: 'FILLED' });
+            client.setEnforceEnums(false);
+            client.getOrdersForAccount(ACCOUNT_HASH, { status: 'FILLED' });
             expect(mockSession.get).toHaveBeenCalledWith(
                 makeUrl('/trader/v1/accounts/{accountHash}/orders'),
                 {
@@ -307,9 +306,9 @@ describe('Client', () => {
         });
     });
 
-    describe('get_orders_for_all_linked_accounts', () => {
+    describe('getOrdersForAllLinkedAccounts', () => {
         test('vanilla', () => {
-            client.get_orders_for_all_linked_accounts();
+            client.getOrdersForAllLinkedAccounts();
             expect(mockSession.get).toHaveBeenCalledWith(
                 makeUrl('/trader/v1/orders'),
                 {
@@ -323,19 +322,19 @@ describe('Client', () => {
 
         test('from_not_datetime', () => {
             expect(() => {
-                client.get_orders_for_all_linked_accounts({ from_entered_datetime: '2020-01-02' as any });
-            }).toThrow("expected type in (Date) for from_entered_datetime, got 'string'");
+                client.getOrdersForAllLinkedAccounts({ fromEnteredTime: '2020-01-02' as any });
+            }).toThrow("expected type in (Date) for fromEnteredTime, got 'string'");
         });
 
         test('to_not_datetime', () => {
             expect(() => {
-                client.get_orders_for_all_linked_accounts({ to_entered_datetime: '2020-01-02' as any });
-            }).toThrow("expected type in (Date) for to_entered_datetime, got 'string'");
+                client.getOrdersForAllLinkedAccounts({ toEnteredTime: '2020-01-02' as any });
+            }).toThrow("expected type in (Date) for toEnteredTime, got 'string'");
         });
 
         test('from_entered_datetime', () => {
             const fromDate = new Date('2019-12-01T00:00:00Z');
-            client.get_orders_for_all_linked_accounts({ from_entered_datetime: fromDate });
+            client.getOrdersForAllLinkedAccounts({ fromEnteredTime: fromDate });
             expect(mockSession.get).toHaveBeenCalledWith(
                 makeUrl('/trader/v1/orders'),
                 {
@@ -349,7 +348,7 @@ describe('Client', () => {
 
         test('to_entered_datetime', () => {
             const toDate = new Date('2019-12-31T23:59:59Z');
-            client.get_orders_for_all_linked_accounts({ to_entered_datetime: toDate });
+            client.getOrdersForAllLinkedAccounts({ toEnteredTime: toDate });
             expect(mockSession.get).toHaveBeenCalledWith(
                 makeUrl('/trader/v1/orders'),
                 {
@@ -362,7 +361,7 @@ describe('Client', () => {
         });
 
         test('max_results', () => {
-            client.get_orders_for_all_linked_accounts({ max_results: 100 });
+            client.getOrdersForAllLinkedAccounts({ maxResults: 100 });
             expect(mockSession.get).toHaveBeenCalledWith(
                 makeUrl('/trader/v1/orders'),
                 {
@@ -376,7 +375,7 @@ describe('Client', () => {
         });
 
         test('status', () => {
-            client.get_orders_for_all_linked_accounts({ status: Client.Order.Status.FILLED });
+            client.getOrdersForAllLinkedAccounts({ status: 'FILLED' });
             expect(mockSession.get).toHaveBeenCalledWith(
                 makeUrl('/trader/v1/orders'),
                 {
@@ -390,8 +389,8 @@ describe('Client', () => {
         });
 
         test('multiple_statuses', () => {
-            client.get_orders_for_all_linked_accounts({
-                status: [Client.Order.Status.FILLED, Client.Order.Status.REJECTED]
+            client.getOrdersForAllLinkedAccounts({
+                status: ['FILLED', 'REJECTED']
             });
             expect(mockSession.get).toHaveBeenCalledWith(
                 makeUrl('/trader/v1/orders'),
@@ -406,8 +405,8 @@ describe('Client', () => {
         });
 
         test('status_unchecked', () => {
-            client.set_enforce_enums(false);
-            client.get_orders_for_all_linked_accounts({ status: 'FILLED' });
+            client.setEnforceEnums(false);
+            client.getOrdersForAllLinkedAccounts({ status: 'FILLED' });
             expect(mockSession.get).toHaveBeenCalledWith(
                 makeUrl('/trader/v1/orders'),
                 {
@@ -421,10 +420,10 @@ describe('Client', () => {
         });
     });
 
-    describe('place_order', () => {
+    describe('placeOrder', () => {
         test('basic', () => {
             const order = { orderType: OrderType.MARKET, session: Session.NORMAL };
-            client.place_order(order, ACCOUNT_HASH);
+            client.placeOrder(ACCOUNT_HASH, order);
             expect(mockSession.post).toHaveBeenCalledWith(
                 makeUrl('/trader/v1/accounts/{accountHash}/orders'),
                 { json: order }
@@ -435,7 +434,7 @@ describe('Client', () => {
             const builder = new OrderBuilder();
             builder.setOrderType(OrderType.MARKET);
             builder.setSession(Session.NORMAL);
-            client.place_order(builder, ACCOUNT_HASH);
+            client.placeOrder(ACCOUNT_HASH, builder);
             expect(mockSession.post).toHaveBeenCalledWith(
                 makeUrl('/trader/v1/accounts/{accountHash}/orders'),
                 { json: builder.build() }
@@ -444,7 +443,7 @@ describe('Client', () => {
 
         test('with string parameters', () => {
             const order = { orderType: OrderType.MARKET, session: Session.NORMAL };
-            client.place_order(order, ACCOUNT_HASH.toString());
+            client.placeOrder(ACCOUNT_HASH.toString(), order);
             expect(mockSession.post).toHaveBeenCalledWith(
                 makeUrl('/trader/v1/accounts/{accountHash}/orders'),
                 { json: order }
@@ -452,10 +451,10 @@ describe('Client', () => {
         });
     });
 
-    describe('replace_order', () => {
+    describe('replaceOrder', () => {
         test('basic', () => {
             const order = { orderType: OrderType.MARKET, session: Session.NORMAL };
-            client.replace_order(ORDER_ID, order, ACCOUNT_HASH);
+            client.replaceOrder(ORDER_ID, ACCOUNT_HASH, order);
             expect(mockSession.put).toHaveBeenCalledWith(
                 makeUrl('/trader/v1/accounts/{accountHash}/orders/{orderId}'),
                 { json: order }
@@ -466,7 +465,7 @@ describe('Client', () => {
             const builder = new OrderBuilder();
             builder.setOrderType(OrderType.MARKET);
             builder.setSession(Session.NORMAL);
-            client.replace_order(ORDER_ID, builder, ACCOUNT_HASH);
+            client.replaceOrder(ORDER_ID, ACCOUNT_HASH, builder);
             expect(mockSession.put).toHaveBeenCalledWith(
                 makeUrl('/trader/v1/accounts/{accountHash}/orders/{orderId}'),
                 { json: builder.build() }
@@ -475,7 +474,7 @@ describe('Client', () => {
 
         test('with string parameters', () => {
             const order = { orderType: OrderType.MARKET, session: Session.NORMAL };
-            client.replace_order(ORDER_ID.toString(), order, ACCOUNT_HASH.toString());
+            client.replaceOrder(ORDER_ID.toString(), ACCOUNT_HASH.toString(), order);
             expect(mockSession.put).toHaveBeenCalledWith(
                 makeUrl('/trader/v1/accounts/{accountHash}/orders/{orderId}'),
                 { json: order }
@@ -483,10 +482,10 @@ describe('Client', () => {
         });
     });
 
-    describe('preview_order', () => {
+    describe('previewOrder', () => {
         test('basic', () => {
             const order = { orderType: OrderType.MARKET, session: Session.NORMAL };
-            client.preview_order(order, ACCOUNT_HASH);
+            client.previewOrder(ACCOUNT_HASH, order);
             expect(mockSession.post).toHaveBeenCalledWith(
                 makeUrl('/trader/v1/accounts/{accountHash}/previewOrder'),
                 { json: order }
@@ -497,7 +496,7 @@ describe('Client', () => {
             const builder = new OrderBuilder();
             builder.setOrderType(OrderType.MARKET);
             builder.setSession(Session.NORMAL);
-            client.preview_order(builder, ACCOUNT_HASH);
+            client.previewOrder(ACCOUNT_HASH, builder);
             expect(mockSession.post).toHaveBeenCalledWith(
                 makeUrl('/trader/v1/accounts/{accountHash}/previewOrder'),
                 { json: builder.build() }
