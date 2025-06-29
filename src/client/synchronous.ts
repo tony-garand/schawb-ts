@@ -74,6 +74,20 @@ export class Client extends BaseClient {
     return this._getRequest(`/trader/v1/accounts/${accountHash}`, params);
   }
 
+  // Transaction methods
+  async getTransactions(accountHash: string, params: Record<string, any> = {}): Promise<Response> {
+    return this._getRequest(`/trader/v1/accounts/${accountHash}/transactions`, params);
+  }
+
+  async getTransaction(transactionId: string | number, accountHash: string): Promise<Response> {
+    return this._getRequest(`/trader/v1/accounts/${accountHash}/transactions/${transactionId}`, {});
+  }
+
+  // User preferences
+  async getUserPreferences(): Promise<Response> {
+    return this._getRequest('/trader/v1/user/preferences', {});
+  }
+
   // Order methods
   async getOrdersForAccount(accountHash: string, params: Record<string, any> = {}): Promise<Response> {
     return this._getRequest(`/trader/v1/accounts/${accountHash}/orders`, params);
@@ -95,12 +109,54 @@ export class Client extends BaseClient {
     return this._postRequest(`/trader/v1/accounts/${accountHash}/orders`, orderSpec);
   }
 
-  async replaceOrder(orderId: string | number, accountHash: string, orderSpec: any): Promise<Response> {
+  async replaceOrder(accountHash: string, orderId: string | number, orderSpec: any): Promise<Response> {
     return this._putRequest(`/trader/v1/accounts/${accountHash}/orders/${orderId}`, orderSpec);
   }
 
   async previewOrder(accountHash: string, orderSpec: any): Promise<Response> {
     return this._postRequest(`/trader/v1/accounts/${accountHash}/previewOrder`, orderSpec);
+  }
+
+  // Market data methods
+  async getQuote(symbol: string, params: Record<string, any> = {}): Promise<Response> {
+    return this._getRequest(`/marketdata/v1/quotes/${symbol}`, params);
+  }
+
+  async getQuotes(symbols: string | string[], params: Record<string, any> = {}): Promise<Response> {
+    const symbolsParam = Array.isArray(symbols) ? symbols.join(',') : symbols;
+    return this._getRequest('/marketdata/v1/quotes', { ...params, symbols: symbolsParam });
+  }
+
+  async getPriceHistory(symbol: string, params: Record<string, any> = {}): Promise<Response> {
+    return this._getRequest('/marketdata/v1/pricehistory', { ...params, symbol });
+  }
+
+  async getOptionChain(symbol: string, params: Record<string, any> = {}): Promise<Response> {
+    return this._getRequest('/marketdata/v1/chains', { ...params, symbol });
+  }
+
+  async getOptionExpirationChain(symbol: string): Promise<Response> {
+    return this._getRequest('/marketdata/v1/expirationchain', { symbol });
+  }
+
+  async getMovers(index: string, params: Record<string, any> = {}): Promise<Response> {
+    return this._getRequest(`/marketdata/v1/movers/${index}`, params);
+  }
+
+  async getMarketHours(market: string | string[], params: Record<string, any> = {}): Promise<Response> {
+    if (Array.isArray(market)) {
+      return this._getRequest('/marketdata/v1/markets/hours', { ...params, markets: market.join(',') });
+    } else {
+      return this._getRequest(`/marketdata/v1/markets/${market}/hours`, params);
+    }
+  }
+
+  async getInstruments(symbol: string, params: Record<string, any> = {}): Promise<Response> {
+    return this._getRequest('/marketdata/v1/instruments', { ...params, symbol });
+  }
+
+  async getInstrumentByCusip(cusip: string): Promise<Response> {
+    return this._getRequest(`/marketdata/v1/instruments/${cusip}`, {});
   }
 
   // Utility methods

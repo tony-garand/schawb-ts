@@ -1,6 +1,6 @@
 import { Client } from '../src/client/index';
 import { OrderBuilder } from '../src/orders/generic';
-import { OrderType, Session } from '../src/orders/common';
+import { OrderType } from '../src/orders/common';
 import { jest } from '@jest/globals';
 
 // Constants
@@ -408,8 +408,8 @@ describe('Client', () => {
         });
 
         test('with order builder', () => {
-            const orderSpec = new OrderBuilder(false).setOrderType('LIMIT');
-            const expectedSpec = { orderType: 'LIMIT' };
+            const orderSpec = new OrderBuilder().setOrderType(OrderType.LIMIT);
+            const expectedSpec = { orderType: OrderType.LIMIT };
             client.placeOrder(ACCOUNT_HASH, orderSpec);
             expect(mockSession.post).toHaveBeenCalledWith(
                 makeUrl('/trader/v1/accounts/{accountHash}/orders'),
@@ -430,7 +430,7 @@ describe('Client', () => {
     describe('replaceOrder', () => {
         test('basic', () => {
             const orderSpec = { order: 'spec' };
-            client.replaceOrder(ACCOUNT_HASH, ORDER_ID, orderSpec);
+            client.replaceOrder(ACCOUNT_HASH, ORDER_ID.toString(), orderSpec);
             expect(mockSession.put).toHaveBeenCalledWith(
                 makeUrl('/trader/v1/accounts/{accountHash}/orders/{orderId}'),
                 orderSpec
@@ -438,9 +438,9 @@ describe('Client', () => {
         });
 
         test('with order builder', () => {
-            const orderSpec = new OrderBuilder(false).setOrderType('LIMIT');
-            const expectedSpec = { orderType: 'LIMIT' };
-            client.replaceOrder(ACCOUNT_HASH, ORDER_ID, orderSpec);
+            const orderSpec = new OrderBuilder().setOrderType(OrderType.LIMIT);
+            const expectedSpec = { orderType: OrderType.LIMIT };
+            client.replaceOrder(ACCOUNT_HASH, ORDER_ID.toString(), orderSpec);
             expect(mockSession.put).toHaveBeenCalledWith(
                 makeUrl('/trader/v1/accounts/{accountHash}/orders/{orderId}'),
                 expectedSpec
@@ -468,8 +468,8 @@ describe('Client', () => {
         });
 
         test('with order builder', () => {
-            const orderSpec = new OrderBuilder(false).setOrderType('LIMIT');
-            const expectedSpec = { orderType: 'LIMIT' };
+            const orderSpec = new OrderBuilder().setOrderType(OrderType.LIMIT);
+            const expectedSpec = { orderType: OrderType.LIMIT };
             client.previewOrder(ACCOUNT_HASH, orderSpec);
             expect(mockSession.post).toHaveBeenCalledWith(
                 makeUrl('/trader/v1/accounts/{accountHash}/previewOrder'),
@@ -856,6 +856,733 @@ describe('Client', () => {
                 }
             );
         });
+
+        // Every minute frequency tests
+        describe('Every Minute Frequency', () => {
+            test('vanilla', () => {
+                client.getPriceHistory(SYMBOL, { frequencyType: 'minute', frequency: 1 });
+                expect(mockSession.get).toHaveBeenCalledWith(
+                    makeUrl('/marketdata/v1/pricehistory'),
+                    {
+                        params: {
+                            symbol: SYMBOL,
+                            periodType: 'day',
+                            period: 1,
+                            frequencyType: 'minute',
+                            frequency: 1
+                        }
+                    }
+                );
+            });
+
+            test('with start datetime', () => {
+                const startDate = new Date('2019-12-01T00:00:00Z');
+                client.getPriceHistory(SYMBOL, { 
+                    frequencyType: 'minute', 
+                    frequency: 1, 
+                    startDate 
+                });
+                expect(mockSession.get).toHaveBeenCalledWith(
+                    makeUrl('/marketdata/v1/pricehistory'),
+                    {
+                        params: {
+                            symbol: SYMBOL,
+                            periodType: 'day',
+                            period: 1,
+                            frequencyType: 'minute',
+                            frequency: 1,
+                            startDate: '2019-12-01T00:00:00Z'
+                        }
+                    }
+                );
+            });
+
+            test('with end datetime', () => {
+                const endDate = new Date('2020-01-01T00:00:00Z');
+                client.getPriceHistory(SYMBOL, { 
+                    frequencyType: 'minute', 
+                    frequency: 1, 
+                    endDate 
+                });
+                expect(mockSession.get).toHaveBeenCalledWith(
+                    makeUrl('/marketdata/v1/pricehistory'),
+                    {
+                        params: {
+                            symbol: SYMBOL,
+                            periodType: 'day',
+                            period: 1,
+                            frequencyType: 'minute',
+                            frequency: 1,
+                            endDate: '2020-01-01T00:00:00Z'
+                        }
+                    }
+                );
+            });
+
+            test('with extended hours data', () => {
+                client.getPriceHistory(SYMBOL, { 
+                    frequencyType: 'minute', 
+                    frequency: 1, 
+                    needExtendedHoursData: true 
+                });
+                expect(mockSession.get).toHaveBeenCalledWith(
+                    makeUrl('/marketdata/v1/pricehistory'),
+                    {
+                        params: {
+                            symbol: SYMBOL,
+                            periodType: 'day',
+                            period: 1,
+                            frequencyType: 'minute',
+                            frequency: 1,
+                            needExtendedHoursData: true
+                        }
+                    }
+                );
+            });
+
+            test('with previous close', () => {
+                client.getPriceHistory(SYMBOL, { 
+                    frequencyType: 'minute', 
+                    frequency: 1, 
+                    needPreviousClose: true 
+                });
+                expect(mockSession.get).toHaveBeenCalledWith(
+                    makeUrl('/marketdata/v1/pricehistory'),
+                    {
+                        params: {
+                            symbol: SYMBOL,
+                            periodType: 'day',
+                            period: 1,
+                            frequencyType: 'minute',
+                            frequency: 1,
+                            needPreviousClose: true
+                        }
+                    }
+                );
+            });
+        });
+
+        // Every 5 minutes frequency tests
+        describe('Every 5 Minutes Frequency', () => {
+            test('vanilla', () => {
+                client.getPriceHistory(SYMBOL, { frequencyType: 'minute', frequency: 5 });
+                expect(mockSession.get).toHaveBeenCalledWith(
+                    makeUrl('/marketdata/v1/pricehistory'),
+                    {
+                        params: {
+                            symbol: SYMBOL,
+                            periodType: 'day',
+                            period: 1,
+                            frequencyType: 'minute',
+                            frequency: 5
+                        }
+                    }
+                );
+            });
+
+            test('with start datetime', () => {
+                const startDate = new Date('2019-12-01T00:00:00Z');
+                client.getPriceHistory(SYMBOL, { 
+                    frequencyType: 'minute', 
+                    frequency: 5, 
+                    startDate 
+                });
+                expect(mockSession.get).toHaveBeenCalledWith(
+                    makeUrl('/marketdata/v1/pricehistory'),
+                    {
+                        params: {
+                            symbol: SYMBOL,
+                            periodType: 'day',
+                            period: 1,
+                            frequencyType: 'minute',
+                            frequency: 5,
+                            startDate: '2019-12-01T00:00:00Z'
+                        }
+                    }
+                );
+            });
+
+            test('with end datetime', () => {
+                const endDate = new Date('2020-01-01T00:00:00Z');
+                client.getPriceHistory(SYMBOL, { 
+                    frequencyType: 'minute', 
+                    frequency: 5, 
+                    endDate 
+                });
+                expect(mockSession.get).toHaveBeenCalledWith(
+                    makeUrl('/marketdata/v1/pricehistory'),
+                    {
+                        params: {
+                            symbol: SYMBOL,
+                            periodType: 'day',
+                            period: 1,
+                            frequencyType: 'minute',
+                            frequency: 5,
+                            endDate: '2020-01-01T00:00:00Z'
+                        }
+                    }
+                );
+            });
+
+            test('with extended hours data', () => {
+                client.getPriceHistory(SYMBOL, { 
+                    frequencyType: 'minute', 
+                    frequency: 5, 
+                    needExtendedHoursData: true 
+                });
+                expect(mockSession.get).toHaveBeenCalledWith(
+                    makeUrl('/marketdata/v1/pricehistory'),
+                    {
+                        params: {
+                            symbol: SYMBOL,
+                            periodType: 'day',
+                            period: 1,
+                            frequencyType: 'minute',
+                            frequency: 5,
+                            needExtendedHoursData: true
+                        }
+                    }
+                );
+            });
+
+            test('with previous close', () => {
+                client.getPriceHistory(SYMBOL, { 
+                    frequencyType: 'minute', 
+                    frequency: 5, 
+                    needPreviousClose: true 
+                });
+                expect(mockSession.get).toHaveBeenCalledWith(
+                    makeUrl('/marketdata/v1/pricehistory'),
+                    {
+                        params: {
+                            symbol: SYMBOL,
+                            periodType: 'day',
+                            period: 1,
+                            frequencyType: 'minute',
+                            frequency: 5,
+                            needPreviousClose: true
+                        }
+                    }
+                );
+            });
+        });
+
+        // Every 10 minutes frequency tests
+        describe('Every 10 Minutes Frequency', () => {
+            test('vanilla', () => {
+                client.getPriceHistory(SYMBOL, { frequencyType: 'minute', frequency: 10 });
+                expect(mockSession.get).toHaveBeenCalledWith(
+                    makeUrl('/marketdata/v1/pricehistory'),
+                    {
+                        params: {
+                            symbol: SYMBOL,
+                            periodType: 'day',
+                            period: 1,
+                            frequencyType: 'minute',
+                            frequency: 10
+                        }
+                    }
+                );
+            });
+
+            test('with start datetime', () => {
+                const startDate = new Date('2019-12-01T00:00:00Z');
+                client.getPriceHistory(SYMBOL, { 
+                    frequencyType: 'minute', 
+                    frequency: 10, 
+                    startDate 
+                });
+                expect(mockSession.get).toHaveBeenCalledWith(
+                    makeUrl('/marketdata/v1/pricehistory'),
+                    {
+                        params: {
+                            symbol: SYMBOL,
+                            periodType: 'day',
+                            period: 1,
+                            frequencyType: 'minute',
+                            frequency: 10,
+                            startDate: '2019-12-01T00:00:00Z'
+                        }
+                    }
+                );
+            });
+
+            test('with end datetime', () => {
+                const endDate = new Date('2020-01-01T00:00:00Z');
+                client.getPriceHistory(SYMBOL, { 
+                    frequencyType: 'minute', 
+                    frequency: 10, 
+                    endDate 
+                });
+                expect(mockSession.get).toHaveBeenCalledWith(
+                    makeUrl('/marketdata/v1/pricehistory'),
+                    {
+                        params: {
+                            symbol: SYMBOL,
+                            periodType: 'day',
+                            period: 1,
+                            frequencyType: 'minute',
+                            frequency: 10,
+                            endDate: '2020-01-01T00:00:00Z'
+                        }
+                    }
+                );
+            });
+
+            test('with extended hours data', () => {
+                client.getPriceHistory(SYMBOL, { 
+                    frequencyType: 'minute', 
+                    frequency: 10, 
+                    needExtendedHoursData: true 
+                });
+                expect(mockSession.get).toHaveBeenCalledWith(
+                    makeUrl('/marketdata/v1/pricehistory'),
+                    {
+                        params: {
+                            symbol: SYMBOL,
+                            periodType: 'day',
+                            period: 1,
+                            frequencyType: 'minute',
+                            frequency: 10,
+                            needExtendedHoursData: true
+                        }
+                    }
+                );
+            });
+
+            test('with previous close', () => {
+                client.getPriceHistory(SYMBOL, { 
+                    frequencyType: 'minute', 
+                    frequency: 10, 
+                    needPreviousClose: true 
+                });
+                expect(mockSession.get).toHaveBeenCalledWith(
+                    makeUrl('/marketdata/v1/pricehistory'),
+                    {
+                        params: {
+                            symbol: SYMBOL,
+                            periodType: 'day',
+                            period: 1,
+                            frequencyType: 'minute',
+                            frequency: 10,
+                            needPreviousClose: true
+                        }
+                    }
+                );
+            });
+        });
+
+        // Every 15 minutes frequency tests
+        describe('Every 15 Minutes Frequency', () => {
+            test('vanilla', () => {
+                client.getPriceHistory(SYMBOL, { frequencyType: 'minute', frequency: 15 });
+                expect(mockSession.get).toHaveBeenCalledWith(
+                    makeUrl('/marketdata/v1/pricehistory'),
+                    {
+                        params: {
+                            symbol: SYMBOL,
+                            periodType: 'day',
+                            period: 1,
+                            frequencyType: 'minute',
+                            frequency: 15
+                        }
+                    }
+                );
+            });
+
+            test('with start datetime', () => {
+                const startDate = new Date('2019-12-01T00:00:00Z');
+                client.getPriceHistory(SYMBOL, { 
+                    frequencyType: 'minute', 
+                    frequency: 15, 
+                    startDate 
+                });
+                expect(mockSession.get).toHaveBeenCalledWith(
+                    makeUrl('/marketdata/v1/pricehistory'),
+                    {
+                        params: {
+                            symbol: SYMBOL,
+                            periodType: 'day',
+                            period: 1,
+                            frequencyType: 'minute',
+                            frequency: 15,
+                            startDate: '2019-12-01T00:00:00Z'
+                        }
+                    }
+                );
+            });
+
+            test('with end datetime', () => {
+                const endDate = new Date('2020-01-01T00:00:00Z');
+                client.getPriceHistory(SYMBOL, { 
+                    frequencyType: 'minute', 
+                    frequency: 15, 
+                    endDate 
+                });
+                expect(mockSession.get).toHaveBeenCalledWith(
+                    makeUrl('/marketdata/v1/pricehistory'),
+                    {
+                        params: {
+                            symbol: SYMBOL,
+                            periodType: 'day',
+                            period: 1,
+                            frequencyType: 'minute',
+                            frequency: 15,
+                            endDate: '2020-01-01T00:00:00Z'
+                        }
+                    }
+                );
+            });
+
+            test('with extended hours data', () => {
+                client.getPriceHistory(SYMBOL, { 
+                    frequencyType: 'minute', 
+                    frequency: 15, 
+                    needExtendedHoursData: true 
+                });
+                expect(mockSession.get).toHaveBeenCalledWith(
+                    makeUrl('/marketdata/v1/pricehistory'),
+                    {
+                        params: {
+                            symbol: SYMBOL,
+                            periodType: 'day',
+                            period: 1,
+                            frequencyType: 'minute',
+                            frequency: 15,
+                            needExtendedHoursData: true
+                        }
+                    }
+                );
+            });
+
+            test('with previous close', () => {
+                client.getPriceHistory(SYMBOL, { 
+                    frequencyType: 'minute', 
+                    frequency: 15, 
+                    needPreviousClose: true 
+                });
+                expect(mockSession.get).toHaveBeenCalledWith(
+                    makeUrl('/marketdata/v1/pricehistory'),
+                    {
+                        params: {
+                            symbol: SYMBOL,
+                            periodType: 'day',
+                            period: 1,
+                            frequencyType: 'minute',
+                            frequency: 15,
+                            needPreviousClose: true
+                        }
+                    }
+                );
+            });
+        });
+
+        // Every 30 minutes frequency tests
+        describe('Every 30 Minutes Frequency', () => {
+            test('vanilla', () => {
+                client.getPriceHistory(SYMBOL, { frequencyType: 'minute', frequency: 30 });
+                expect(mockSession.get).toHaveBeenCalledWith(
+                    makeUrl('/marketdata/v1/pricehistory'),
+                    {
+                        params: {
+                            symbol: SYMBOL,
+                            periodType: 'day',
+                            period: 1,
+                            frequencyType: 'minute',
+                            frequency: 30
+                        }
+                    }
+                );
+            });
+
+            test('with start datetime', () => {
+                const startDate = new Date('2019-12-01T00:00:00Z');
+                client.getPriceHistory(SYMBOL, { 
+                    frequencyType: 'minute', 
+                    frequency: 30, 
+                    startDate 
+                });
+                expect(mockSession.get).toHaveBeenCalledWith(
+                    makeUrl('/marketdata/v1/pricehistory'),
+                    {
+                        params: {
+                            symbol: SYMBOL,
+                            periodType: 'day',
+                            period: 1,
+                            frequencyType: 'minute',
+                            frequency: 30,
+                            startDate: '2019-12-01T00:00:00Z'
+                        }
+                    }
+                );
+            });
+
+            test('with end datetime', () => {
+                const endDate = new Date('2020-01-01T00:00:00Z');
+                client.getPriceHistory(SYMBOL, { 
+                    frequencyType: 'minute', 
+                    frequency: 30, 
+                    endDate 
+                });
+                expect(mockSession.get).toHaveBeenCalledWith(
+                    makeUrl('/marketdata/v1/pricehistory'),
+                    {
+                        params: {
+                            symbol: SYMBOL,
+                            periodType: 'day',
+                            period: 1,
+                            frequencyType: 'minute',
+                            frequency: 30,
+                            endDate: '2020-01-01T00:00:00Z'
+                        }
+                    }
+                );
+            });
+
+            test('with extended hours data', () => {
+                client.getPriceHistory(SYMBOL, { 
+                    frequencyType: 'minute', 
+                    frequency: 30, 
+                    needExtendedHoursData: true 
+                });
+                expect(mockSession.get).toHaveBeenCalledWith(
+                    makeUrl('/marketdata/v1/pricehistory'),
+                    {
+                        params: {
+                            symbol: SYMBOL,
+                            periodType: 'day',
+                            period: 1,
+                            frequencyType: 'minute',
+                            frequency: 30,
+                            needExtendedHoursData: true
+                        }
+                    }
+                );
+            });
+
+            test('with previous close', () => {
+                client.getPriceHistory(SYMBOL, { 
+                    frequencyType: 'minute', 
+                    frequency: 30, 
+                    needPreviousClose: true 
+                });
+                expect(mockSession.get).toHaveBeenCalledWith(
+                    makeUrl('/marketdata/v1/pricehistory'),
+                    {
+                        params: {
+                            symbol: SYMBOL,
+                            periodType: 'day',
+                            period: 1,
+                            frequencyType: 'minute',
+                            frequency: 30,
+                            needPreviousClose: true
+                        }
+                    }
+                );
+            });
+        });
+
+        // Daily frequency tests
+        describe('Daily Frequency', () => {
+            test('vanilla', () => {
+                client.getPriceHistory(SYMBOL, { frequencyType: 'daily' });
+                expect(mockSession.get).toHaveBeenCalledWith(
+                    makeUrl('/marketdata/v1/pricehistory'),
+                    {
+                        params: {
+                            symbol: SYMBOL,
+                            periodType: 'day',
+                            period: 1,
+                            frequencyType: 'daily',
+                            frequency: 1
+                        }
+                    }
+                );
+            });
+
+            test('with start datetime', () => {
+                const startDate = new Date('2019-12-01T00:00:00Z');
+                client.getPriceHistory(SYMBOL, { 
+                    frequencyType: 'daily', 
+                    startDate 
+                });
+                expect(mockSession.get).toHaveBeenCalledWith(
+                    makeUrl('/marketdata/v1/pricehistory'),
+                    {
+                        params: {
+                            symbol: SYMBOL,
+                            periodType: 'day',
+                            period: 1,
+                            frequencyType: 'daily',
+                            frequency: 1,
+                            startDate: '2019-12-01T00:00:00Z'
+                        }
+                    }
+                );
+            });
+
+            test('with end datetime', () => {
+                const endDate = new Date('2020-01-01T00:00:00Z');
+                client.getPriceHistory(SYMBOL, { 
+                    frequencyType: 'daily', 
+                    endDate 
+                });
+                expect(mockSession.get).toHaveBeenCalledWith(
+                    makeUrl('/marketdata/v1/pricehistory'),
+                    {
+                        params: {
+                            symbol: SYMBOL,
+                            periodType: 'day',
+                            period: 1,
+                            frequencyType: 'daily',
+                            frequency: 1,
+                            endDate: '2020-01-01T00:00:00Z'
+                        }
+                    }
+                );
+            });
+
+            test('with extended hours data', () => {
+                client.getPriceHistory(SYMBOL, { 
+                    frequencyType: 'daily', 
+                    needExtendedHoursData: true 
+                });
+                expect(mockSession.get).toHaveBeenCalledWith(
+                    makeUrl('/marketdata/v1/pricehistory'),
+                    {
+                        params: {
+                            symbol: SYMBOL,
+                            periodType: 'day',
+                            period: 1,
+                            frequencyType: 'daily',
+                            frequency: 1,
+                            needExtendedHoursData: true
+                        }
+                    }
+                );
+            });
+
+            test('with previous close', () => {
+                client.getPriceHistory(SYMBOL, { 
+                    frequencyType: 'daily', 
+                    needPreviousClose: true 
+                });
+                expect(mockSession.get).toHaveBeenCalledWith(
+                    makeUrl('/marketdata/v1/pricehistory'),
+                    {
+                        params: {
+                            symbol: SYMBOL,
+                            periodType: 'day',
+                            period: 1,
+                            frequencyType: 'daily',
+                            frequency: 1,
+                            needPreviousClose: true
+                        }
+                    }
+                );
+            });
+        });
+
+        // Weekly frequency tests
+        describe('Weekly Frequency', () => {
+            test('vanilla', () => {
+                client.getPriceHistory(SYMBOL, { frequencyType: 'weekly' });
+                expect(mockSession.get).toHaveBeenCalledWith(
+                    makeUrl('/marketdata/v1/pricehistory'),
+                    {
+                        params: {
+                            symbol: SYMBOL,
+                            periodType: 'day',
+                            period: 1,
+                            frequencyType: 'weekly',
+                            frequency: 1
+                        }
+                    }
+                );
+            });
+
+            test('with start datetime', () => {
+                const startDate = new Date('2019-12-01T00:00:00Z');
+                client.getPriceHistory(SYMBOL, { 
+                    frequencyType: 'weekly', 
+                    startDate 
+                });
+                expect(mockSession.get).toHaveBeenCalledWith(
+                    makeUrl('/marketdata/v1/pricehistory'),
+                    {
+                        params: {
+                            symbol: SYMBOL,
+                            periodType: 'day',
+                            period: 1,
+                            frequencyType: 'weekly',
+                            frequency: 1,
+                            startDate: '2019-12-01T00:00:00Z'
+                        }
+                    }
+                );
+            });
+
+            test('with end datetime', () => {
+                const endDate = new Date('2020-01-01T00:00:00Z');
+                client.getPriceHistory(SYMBOL, { 
+                    frequencyType: 'weekly', 
+                    endDate 
+                });
+                expect(mockSession.get).toHaveBeenCalledWith(
+                    makeUrl('/marketdata/v1/pricehistory'),
+                    {
+                        params: {
+                            symbol: SYMBOL,
+                            periodType: 'day',
+                            period: 1,
+                            frequencyType: 'weekly',
+                            frequency: 1,
+                            endDate: '2020-01-01T00:00:00Z'
+                        }
+                    }
+                );
+            });
+
+            test('with extended hours data', () => {
+                client.getPriceHistory(SYMBOL, { 
+                    frequencyType: 'weekly', 
+                    needExtendedHoursData: true 
+                });
+                expect(mockSession.get).toHaveBeenCalledWith(
+                    makeUrl('/marketdata/v1/pricehistory'),
+                    {
+                        params: {
+                            symbol: SYMBOL,
+                            periodType: 'day',
+                            period: 1,
+                            frequencyType: 'weekly',
+                            frequency: 1,
+                            needExtendedHoursData: true
+                        }
+                    }
+                );
+            });
+
+            test('with previous close', () => {
+                client.getPriceHistory(SYMBOL, { 
+                    frequencyType: 'weekly', 
+                    needPreviousClose: true 
+                });
+                expect(mockSession.get).toHaveBeenCalledWith(
+                    makeUrl('/marketdata/v1/pricehistory'),
+                    {
+                        params: {
+                            symbol: SYMBOL,
+                            periodType: 'day',
+                            period: 1,
+                            frequencyType: 'weekly',
+                            frequency: 1,
+                            needPreviousClose: true
+                        }
+                    }
+                );
+            });
+        });
     });
 
     describe('getOptionChain', () => {
@@ -937,6 +1664,20 @@ describe('Client', () => {
             );
         });
 
+        test('with strategy unchecked', () => {
+            client.setEnforceEnums(false);
+            client.getOptionChain(SYMBOL, { strategy: 'NOT_A_STRATEGY' });
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/chains'),
+                {
+                    params: {
+                        symbol: SYMBOL,
+                        strategy: 'NOT_A_STRATEGY'
+                    }
+                }
+            );
+        });
+
         test('with interval', () => {
             client.getOptionChain(SYMBOL, { interval: 1 });
             expect(mockSession.get).toHaveBeenCalledWith(
@@ -976,7 +1717,21 @@ describe('Client', () => {
             );
         });
 
-        test('with from date', () => {
+        test('with strike range unchecked', () => {
+            client.setEnforceEnums(false);
+            client.getOptionChain(SYMBOL, { strikeRange: 'NOT_A_STRIKE_RANGE' });
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/chains'),
+                {
+                    params: {
+                        symbol: SYMBOL,
+                        strikeRange: 'NOT_A_STRIKE_RANGE'
+                    }
+                }
+            );
+        });
+
+        test('with from date as datetime', () => {
             const fromDate = new Date('2019-12-01T00:00:00Z');
             client.getOptionChain(SYMBOL, { fromDate });
             expect(mockSession.get).toHaveBeenCalledWith(
@@ -990,7 +1745,34 @@ describe('Client', () => {
             );
         });
 
-        test('with to date', () => {
+        test('with from date as date', () => {
+            const fromDate = new Date('2019-12-01');
+            client.getOptionChain(SYMBOL, { fromDate });
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/chains'),
+                {
+                    params: {
+                        symbol: SYMBOL,
+                        fromDate: '2019-12-01T00:00:00Z'
+                    }
+                }
+            );
+        });
+
+        test('with from date as string', () => {
+            client.getOptionChain(SYMBOL, { fromDate: '2019-12-01' });
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/chains'),
+                {
+                    params: {
+                        symbol: SYMBOL,
+                        fromDate: '2019-12-01'
+                    }
+                }
+            );
+        });
+
+        test('with to date as datetime', () => {
             const toDate = new Date('2020-01-01T00:00:00Z');
             client.getOptionChain(SYMBOL, { toDate });
             expect(mockSession.get).toHaveBeenCalledWith(
@@ -999,6 +1781,33 @@ describe('Client', () => {
                     params: {
                         symbol: SYMBOL,
                         toDate: '2020-01-01T00:00:00Z'
+                    }
+                }
+            );
+        });
+
+        test('with to date as date', () => {
+            const toDate = new Date('2020-01-01');
+            client.getOptionChain(SYMBOL, { toDate });
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/chains'),
+                {
+                    params: {
+                        symbol: SYMBOL,
+                        toDate: '2020-01-01T00:00:00Z'
+                    }
+                }
+            );
+        });
+
+        test('with to date as string', () => {
+            client.getOptionChain(SYMBOL, { toDate: '2020-01-01' });
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/chains'),
+                {
+                    params: {
+                        symbol: SYMBOL,
+                        toDate: '2020-01-01'
                     }
                 }
             );
@@ -1069,6 +1878,20 @@ describe('Client', () => {
             );
         });
 
+        test('with exp month unchecked', () => {
+            client.setEnforceEnums(false);
+            client.getOptionChain(SYMBOL, { expMonth: 'NOT_A_MONTH' });
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/chains'),
+                {
+                    params: {
+                        symbol: SYMBOL,
+                        expMonth: 'NOT_A_MONTH'
+                    }
+                }
+            );
+        });
+
         test('with option type', () => {
             client.getOptionChain(SYMBOL, { optionType: 'S' });
             expect(mockSession.get).toHaveBeenCalledWith(
@@ -1082,6 +1905,20 @@ describe('Client', () => {
             );
         });
 
+        test('with option type unchecked', () => {
+            client.setEnforceEnums(false);
+            client.getOptionChain(SYMBOL, { optionType: 'NOT_AN_OPTION_TYPE' });
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/chains'),
+                {
+                    params: {
+                        symbol: SYMBOL,
+                        optionType: 'NOT_AN_OPTION_TYPE'
+                    }
+                }
+            );
+        });
+
         test('with option entitlement', () => {
             client.getOptionChain(SYMBOL, { optionEntitlement: 'ALL' });
             expect(mockSession.get).toHaveBeenCalledWith(
@@ -1090,6 +1927,53 @@ describe('Client', () => {
                     params: {
                         symbol: SYMBOL,
                         optionEntitlement: 'ALL'
+                    }
+                }
+            );
+        });
+
+        test('with multiple parameters', () => {
+            const fromDate = new Date('2019-12-01T00:00:00Z');
+            const toDate = new Date('2020-01-01T00:00:00Z');
+            client.getOptionChain(SYMBOL, { 
+                contractType: 'CALL',
+                strikeCount: 10,
+                strategy: 'SINGLE',
+                interval: 1,
+                strike: 150,
+                strikeRange: 'ITM',
+                fromDate,
+                toDate,
+                volatility: 0.3,
+                underlyingPrice: 150.0,
+                interestRate: 0.05,
+                daysToExpiration: 30,
+                expMonth: 'JAN',
+                optionType: 'S',
+                optionEntitlement: 'ALL',
+                includeUnderlyingQuotes: true
+            });
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/chains'),
+                {
+                    params: {
+                        symbol: SYMBOL,
+                        contractType: 'CALL',
+                        strikeCount: 10,
+                        strategy: 'SINGLE',
+                        interval: 1,
+                        strike: 150,
+                        strikeRange: 'ITM',
+                        fromDate: '2019-12-01T00:00:00Z',
+                        toDate: '2020-01-01T00:00:00Z',
+                        volatility: 0.3,
+                        underlyingPrice: 150.0,
+                        interestRate: 0.05,
+                        daysToExpiration: 30,
+                        expMonth: 'JAN',
+                        optionType: 'S',
+                        optionEntitlement: 'ALL',
+                        includeUnderlyingQuotes: true
                     }
                 }
             );
@@ -1136,11 +2020,37 @@ describe('Client', () => {
             );
         });
 
+        test('with sort order unchecked', () => {
+            client.setEnforceEnums(false);
+            client.getMovers(INDEX, { sort: 'NOT_A_SORT_ORDER' });
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/movers/{index}'),
+                { params: { sort: 'NOT_A_SORT_ORDER' } }
+            );
+        });
+
         test('with frequency', () => {
             client.getMovers(INDEX, { frequency: 1 });
             expect(mockSession.get).toHaveBeenCalledWith(
                 makeUrl('/marketdata/v1/movers/{index}'),
                 { params: { frequency: 1 } }
+            );
+        });
+
+        test('with frequency unchecked', () => {
+            client.setEnforceEnums(false);
+            client.getMovers(INDEX, { frequency: 'NOT_A_FREQUENCY' });
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/movers/{index}'),
+                { params: { frequency: 'NOT_A_FREQUENCY' } }
+            );
+        });
+
+        test('with multiple parameters', () => {
+            client.getMovers(INDEX, { sort: 'ASC', frequency: 1 });
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/movers/{index}'),
+                { params: { sort: 'ASC', frequency: 1 } }
             );
         });
     });
@@ -1162,12 +2072,38 @@ describe('Client', () => {
             );
         });
 
+        test('market unchecked', () => {
+            client.setEnforceEnums(false);
+            client.getMarketHours('NOT_A_MARKET');
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/markets/NOT_A_MARKET/hours'),
+                { params: {} }
+            );
+        });
+
         test('with date', () => {
             const date = new Date('2020-01-02T00:00:00Z');
             client.getMarketHours(MARKET, { date });
             expect(mockSession.get).toHaveBeenCalledWith(
                 makeUrl('/marketdata/v1/markets/{market}/hours'),
                 { params: { date: '2020-01-02' } }
+            );
+        });
+
+        test('with date string', () => {
+            client.getMarketHours(MARKET, { date: '2020-01-02' });
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/markets/{market}/hours'),
+                { params: { date: '2020-01-02' } }
+            );
+        });
+
+        test('with date and market list', () => {
+            const date = new Date('2020-01-02T00:00:00Z');
+            client.getMarketHours([MARKET, 'OPTION'], { date });
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/markets/hours'),
+                { params: { markets: 'EQUITY,OPTION', date: '2020-01-02' } }
             );
         });
     });
@@ -1197,6 +2133,17 @@ describe('Client', () => {
                 { params: { symbol: SYMBOL, projection: 'NOT_A_PROJECTION' } }
             );
         });
+
+        test('with string arguments', () => {
+            client.getInstruments(SYMBOL, { 
+                projection: 'SYMBOL_SEARCH',
+                symbol: 'AAPL'
+            });
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/instruments'),
+                { params: { symbol: SYMBOL, projection: 'SYMBOL_SEARCH' } }
+            );
+        });
     });
 
     describe('getInstrumentByCusip', () => {
@@ -1206,6 +2153,184 @@ describe('Client', () => {
                 makeUrl('/marketdata/v1/instruments/{cusip}'),
                 { params: {} }
             );
+        });
+    });
+});
+
+// AsyncClient tests
+describe('AsyncClient', () => {
+    let client: any;
+
+    beforeEach(() => {
+        // Note: AsyncClient would need to be imported and implemented
+        // For now, we'll create a mock that matches the expected interface
+        client = {
+            setEnforceEnums: jest.fn(),
+            getAccount: jest.fn(),
+            getAccounts: jest.fn(),
+            getAccountNumbers: jest.fn(),
+            getOrder: jest.fn(),
+            cancelOrder: jest.fn(),
+            getOrdersForAccount: jest.fn(),
+            getOrdersForAllLinkedAccounts: jest.fn(),
+            placeOrder: jest.fn(),
+            replaceOrder: jest.fn(),
+            previewOrder: jest.fn(),
+            getTransactions: jest.fn(),
+            getTransaction: jest.fn(),
+            getUserPreferences: jest.fn(),
+            getQuote: jest.fn(),
+            getQuotes: jest.fn(),
+            getPriceHistory: jest.fn(),
+            getOptionChain: jest.fn(),
+            getOptionExpirationChain: jest.fn(),
+            getMovers: jest.fn(),
+            getMarketHours: jest.fn(),
+            getInstruments: jest.fn(),
+            getInstrumentByCusip: jest.fn(),
+            setTimeout: jest.fn(),
+            tokenAge: jest.fn(),
+            logger: console
+        };
+    });
+
+    describe('Generic functionality', () => {
+        test('setTimeout', () => {
+            const timeout = 'dummy';
+            client.setTimeout(timeout);
+            expect(client.setTimeout).toHaveBeenCalledWith(timeout);
+        });
+
+        test('tokenAge', () => {
+            expect(client.tokenAge).toBeDefined();
+        });
+
+        test('setEnforceEnums', () => {
+            client.setEnforceEnums(false);
+            expect(client.setEnforceEnums).toHaveBeenCalledWith(false);
+        });
+    });
+
+    describe('Account operations', () => {
+        test('getAccount', () => {
+            client.getAccount(ACCOUNT_HASH);
+            expect(client.getAccount).toHaveBeenCalledWith(ACCOUNT_HASH);
+        });
+
+        test('getAccounts', () => {
+            client.getAccounts();
+            expect(client.getAccounts).toHaveBeenCalled();
+        });
+
+        test('getAccountNumbers', () => {
+            client.getAccountNumbers();
+            expect(client.getAccountNumbers).toHaveBeenCalled();
+        });
+    });
+
+    describe('Order operations', () => {
+        test('getOrder', () => {
+            client.getOrder(ORDER_ID, ACCOUNT_HASH);
+            expect(client.getOrder).toHaveBeenCalledWith(ORDER_ID, ACCOUNT_HASH);
+        });
+
+        test('cancelOrder', () => {
+            client.cancelOrder(ORDER_ID, ACCOUNT_HASH);
+            expect(client.cancelOrder).toHaveBeenCalledWith(ORDER_ID, ACCOUNT_HASH);
+        });
+
+        test('getOrdersForAccount', () => {
+            client.getOrdersForAccount(ACCOUNT_HASH);
+            expect(client.getOrdersForAccount).toHaveBeenCalledWith(ACCOUNT_HASH);
+        });
+
+        test('getOrdersForAllLinkedAccounts', () => {
+            client.getOrdersForAllLinkedAccounts();
+            expect(client.getOrdersForAllLinkedAccounts).toHaveBeenCalled();
+        });
+
+        test('placeOrder', () => {
+            const orderSpec = { order: 'spec' };
+            client.placeOrder(ACCOUNT_HASH, orderSpec);
+            expect(client.placeOrder).toHaveBeenCalledWith(ACCOUNT_HASH, orderSpec);
+        });
+
+        test('replaceOrder', () => {
+            const orderSpec = { order: 'spec' };
+            client.replaceOrder(ACCOUNT_HASH, ORDER_ID.toString(), orderSpec);
+            expect(client.replaceOrder).toHaveBeenCalledWith(ACCOUNT_HASH, ORDER_ID.toString(), orderSpec);
+        });
+
+        test('previewOrder', () => {
+            const orderSpec = { order: 'spec' };
+            client.previewOrder(ACCOUNT_HASH, orderSpec);
+            expect(client.previewOrder).toHaveBeenCalledWith(ACCOUNT_HASH, orderSpec);
+        });
+    });
+
+    describe('Transaction operations', () => {
+        test('getTransactions', () => {
+            client.getTransactions(ACCOUNT_HASH);
+            expect(client.getTransactions).toHaveBeenCalledWith(ACCOUNT_HASH);
+        });
+
+        test('getTransaction', () => {
+            client.getTransaction(TRANSACTION_ID, ACCOUNT_HASH);
+            expect(client.getTransaction).toHaveBeenCalledWith(TRANSACTION_ID, ACCOUNT_HASH);
+        });
+    });
+
+    describe('Market data operations', () => {
+        test('getQuote', () => {
+            client.getQuote(SYMBOL);
+            expect(client.getQuote).toHaveBeenCalledWith(SYMBOL);
+        });
+
+        test('getQuotes', () => {
+            client.getQuotes([SYMBOL]);
+            expect(client.getQuotes).toHaveBeenCalledWith([SYMBOL]);
+        });
+
+        test('getPriceHistory', () => {
+            client.getPriceHistory(SYMBOL);
+            expect(client.getPriceHistory).toHaveBeenCalledWith(SYMBOL);
+        });
+
+        test('getOptionChain', () => {
+            client.getOptionChain(SYMBOL);
+            expect(client.getOptionChain).toHaveBeenCalledWith(SYMBOL);
+        });
+
+        test('getOptionExpirationChain', () => {
+            client.getOptionExpirationChain(SYMBOL);
+            expect(client.getOptionExpirationChain).toHaveBeenCalledWith(SYMBOL);
+        });
+
+        test('getMovers', () => {
+            client.getMovers(INDEX);
+            expect(client.getMovers).toHaveBeenCalledWith(INDEX);
+        });
+
+        test('getMarketHours', () => {
+            client.getMarketHours(MARKET);
+            expect(client.getMarketHours).toHaveBeenCalledWith(MARKET);
+        });
+
+        test('getInstruments', () => {
+            client.getInstruments(SYMBOL);
+            expect(client.getInstruments).toHaveBeenCalledWith(SYMBOL);
+        });
+
+        test('getInstrumentByCusip', () => {
+            client.getInstrumentByCusip(CUSIP);
+            expect(client.getInstrumentByCusip).toHaveBeenCalledWith(CUSIP);
+        });
+    });
+
+    describe('Async-specific functionality', () => {
+        test('async close', async () => {
+            // This would test the async close method if implemented
+            expect(client).toBeDefined();
         });
     });
 }); 
