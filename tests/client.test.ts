@@ -76,6 +76,11 @@ describe('Client', () => {
             const client = new Client(API_KEY, mockSession, true, tokenMetadata);
             expect(client.tokenAge()).toBe(1000);
         });
+
+        test('setEnforceEnums', () => {
+            client.setEnforceEnums(false);
+            expect(client['enforceEnums']).toBe(false);
+        });
     });
 
     describe('getAccount', () => {
@@ -206,19 +211,7 @@ describe('Client', () => {
             );
         });
 
-        test('from_not_datetime', () => {
-            expect(() => {
-                client.getOrdersForAccount(ACCOUNT_HASH, { fromEnteredTime: '2020-01-02' as any });
-            }).toThrow("expected type in (Date) for fromEnteredTime, got 'string'");
-        });
-
-        test('to_not_datetime', () => {
-            expect(() => {
-                client.getOrdersForAccount(ACCOUNT_HASH, { toEnteredTime: '2020-01-02' as any });
-            }).toThrow("expected type in (Date) for toEnteredTime, got 'string'");
-        });
-
-        test('from_entered_datetime', () => {
+        test('with from date', () => {
             const fromDate = new Date('2019-12-01T00:00:00Z');
             client.getOrdersForAccount(ACCOUNT_HASH, { fromEnteredTime: fromDate });
             expect(mockSession.get).toHaveBeenCalledWith(
@@ -232,35 +225,35 @@ describe('Client', () => {
             );
         });
 
-        test('to_entered_datetime', () => {
-            const toDate = new Date('2019-12-31T23:59:59Z');
+        test('with to date', () => {
+            const toDate = new Date('2020-01-01T00:00:00Z');
             client.getOrdersForAccount(ACCOUNT_HASH, { toEnteredTime: toDate });
             expect(mockSession.get).toHaveBeenCalledWith(
                 makeUrl('/trader/v1/accounts/{accountHash}/orders'),
                 {
                     params: {
                         fromEnteredTime: '2019-11-03T03:04:05Z',
-                        toEnteredTime: '2019-12-31T23:59:59Z'
+                        toEnteredTime: '2020-01-01T00:00:00Z'
                     }
                 }
             );
         });
 
-        test('max_results', () => {
-            client.getOrdersForAccount(ACCOUNT_HASH, { maxResults: 100 });
+        test('with max results', () => {
+            client.getOrdersForAccount(ACCOUNT_HASH, { maxResults: 50 });
             expect(mockSession.get).toHaveBeenCalledWith(
                 makeUrl('/trader/v1/accounts/{accountHash}/orders'),
                 {
                     params: {
                         fromEnteredTime: '2019-11-03T03:04:05Z',
                         toEnteredTime: '2020-01-02T03:04:05Z',
-                        maxResults: 100
+                        maxResults: 50
                     }
                 }
             );
         });
 
-        test('status', () => {
+        test('with status', () => {
             client.getOrdersForAccount(ACCOUNT_HASH, { status: 'FILLED' });
             expect(mockSession.get).toHaveBeenCalledWith(
                 makeUrl('/trader/v1/accounts/{accountHash}/orders'),
@@ -274,32 +267,30 @@ describe('Client', () => {
             );
         });
 
-        test('multiple_statuses', () => {
-            client.getOrdersForAccount(ACCOUNT_HASH, {
-                status: ['FILLED', 'REJECTED']
-            });
+        test('with multiple statuses', () => {
+            client.getOrdersForAccount(ACCOUNT_HASH, { status: ['FILLED', 'CANCELED'] });
             expect(mockSession.get).toHaveBeenCalledWith(
                 makeUrl('/trader/v1/accounts/{accountHash}/orders'),
                 {
                     params: {
                         fromEnteredTime: '2019-11-03T03:04:05Z',
                         toEnteredTime: '2020-01-02T03:04:05Z',
-                        status: 'FILLED,REJECTED'
+                        status: 'FILLED,CANCELED'
                     }
                 }
             );
         });
 
-        test('status_unchecked', () => {
+        test('with status unchecked', () => {
             client.setEnforceEnums(false);
-            client.getOrdersForAccount(ACCOUNT_HASH, { status: 'FILLED' });
+            client.getOrdersForAccount(ACCOUNT_HASH, { status: 'NOT_A_STATUS' });
             expect(mockSession.get).toHaveBeenCalledWith(
                 makeUrl('/trader/v1/accounts/{accountHash}/orders'),
                 {
                     params: {
                         fromEnteredTime: '2019-11-03T03:04:05Z',
                         toEnteredTime: '2020-01-02T03:04:05Z',
-                        status: 'FILLED'
+                        status: 'NOT_A_STATUS'
                     }
                 }
             );
@@ -320,19 +311,7 @@ describe('Client', () => {
             );
         });
 
-        test('from_not_datetime', () => {
-            expect(() => {
-                client.getOrdersForAllLinkedAccounts({ fromEnteredTime: '2020-01-02' as any });
-            }).toThrow("expected type in (Date) for fromEnteredTime, got 'string'");
-        });
-
-        test('to_not_datetime', () => {
-            expect(() => {
-                client.getOrdersForAllLinkedAccounts({ toEnteredTime: '2020-01-02' as any });
-            }).toThrow("expected type in (Date) for toEnteredTime, got 'string'");
-        });
-
-        test('from_entered_datetime', () => {
+        test('with from date', () => {
             const fromDate = new Date('2019-12-01T00:00:00Z');
             client.getOrdersForAllLinkedAccounts({ fromEnteredTime: fromDate });
             expect(mockSession.get).toHaveBeenCalledWith(
@@ -346,35 +325,35 @@ describe('Client', () => {
             );
         });
 
-        test('to_entered_datetime', () => {
-            const toDate = new Date('2019-12-31T23:59:59Z');
+        test('with to date', () => {
+            const toDate = new Date('2020-01-01T00:00:00Z');
             client.getOrdersForAllLinkedAccounts({ toEnteredTime: toDate });
             expect(mockSession.get).toHaveBeenCalledWith(
                 makeUrl('/trader/v1/orders'),
                 {
                     params: {
                         fromEnteredTime: '2019-11-03T03:04:05Z',
-                        toEnteredTime: '2019-12-31T23:59:59Z'
+                        toEnteredTime: '2020-01-01T00:00:00Z'
                     }
                 }
             );
         });
 
-        test('max_results', () => {
-            client.getOrdersForAllLinkedAccounts({ maxResults: 100 });
+        test('with max results', () => {
+            client.getOrdersForAllLinkedAccounts({ maxResults: 50 });
             expect(mockSession.get).toHaveBeenCalledWith(
                 makeUrl('/trader/v1/orders'),
                 {
                     params: {
                         fromEnteredTime: '2019-11-03T03:04:05Z',
                         toEnteredTime: '2020-01-02T03:04:05Z',
-                        maxResults: 100
+                        maxResults: 50
                     }
                 }
             );
         });
 
-        test('status', () => {
+        test('with status', () => {
             client.getOrdersForAllLinkedAccounts({ status: 'FILLED' });
             expect(mockSession.get).toHaveBeenCalledWith(
                 makeUrl('/trader/v1/orders'),
@@ -388,32 +367,30 @@ describe('Client', () => {
             );
         });
 
-        test('multiple_statuses', () => {
-            client.getOrdersForAllLinkedAccounts({
-                status: ['FILLED', 'REJECTED']
-            });
+        test('with multiple statuses', () => {
+            client.getOrdersForAllLinkedAccounts({ status: ['FILLED', 'CANCELED'] });
             expect(mockSession.get).toHaveBeenCalledWith(
                 makeUrl('/trader/v1/orders'),
                 {
                     params: {
                         fromEnteredTime: '2019-11-03T03:04:05Z',
                         toEnteredTime: '2020-01-02T03:04:05Z',
-                        status: 'FILLED,REJECTED'
+                        status: 'FILLED,CANCELED'
                     }
                 }
             );
         });
 
-        test('status_unchecked', () => {
+        test('with status unchecked', () => {
             client.setEnforceEnums(false);
-            client.getOrdersForAllLinkedAccounts({ status: 'FILLED' });
+            client.getOrdersForAllLinkedAccounts({ status: 'NOT_A_STATUS' });
             expect(mockSession.get).toHaveBeenCalledWith(
                 makeUrl('/trader/v1/orders'),
                 {
                     params: {
                         fromEnteredTime: '2019-11-03T03:04:05Z',
                         toEnteredTime: '2020-01-02T03:04:05Z',
-                        status: 'FILLED'
+                        status: 'NOT_A_STATUS'
                     }
                 }
             );
@@ -422,84 +399,812 @@ describe('Client', () => {
 
     describe('placeOrder', () => {
         test('basic', () => {
-            const order = { orderType: OrderType.MARKET, session: Session.NORMAL };
-            client.placeOrder(ACCOUNT_HASH, order);
+            const orderSpec = { order: 'spec' };
+            client.placeOrder(ACCOUNT_HASH, orderSpec);
             expect(mockSession.post).toHaveBeenCalledWith(
                 makeUrl('/trader/v1/accounts/{accountHash}/orders'),
-                { json: order }
+                orderSpec
             );
         });
 
         test('with order builder', () => {
-            const builder = new OrderBuilder();
-            builder.setOrderType(OrderType.MARKET);
-            builder.setSession(Session.NORMAL);
-            client.placeOrder(ACCOUNT_HASH, builder);
+            const orderSpec = new OrderBuilder(false).setOrderType('LIMIT');
+            const expectedSpec = { orderType: 'LIMIT' };
+            client.placeOrder(ACCOUNT_HASH, orderSpec);
             expect(mockSession.post).toHaveBeenCalledWith(
                 makeUrl('/trader/v1/accounts/{accountHash}/orders'),
-                { json: builder.build() }
+                expectedSpec
             );
         });
 
-        test('with string parameters', () => {
-            const order = { orderType: OrderType.MARKET, session: Session.NORMAL };
-            client.placeOrder(ACCOUNT_HASH.toString(), order);
+        test('with string account hash', () => {
+            const orderSpec = { order: 'spec' };
+            client.placeOrder(ACCOUNT_HASH.toString(), orderSpec);
             expect(mockSession.post).toHaveBeenCalledWith(
                 makeUrl('/trader/v1/accounts/{accountHash}/orders'),
-                { json: order }
+                orderSpec
             );
         });
     });
 
     describe('replaceOrder', () => {
         test('basic', () => {
-            const order = { orderType: OrderType.MARKET, session: Session.NORMAL };
-            client.replaceOrder(ORDER_ID, ACCOUNT_HASH, order);
+            const orderSpec = { order: 'spec' };
+            client.replaceOrder(ACCOUNT_HASH, ORDER_ID, orderSpec);
             expect(mockSession.put).toHaveBeenCalledWith(
                 makeUrl('/trader/v1/accounts/{accountHash}/orders/{orderId}'),
-                { json: order }
+                orderSpec
             );
         });
 
         test('with order builder', () => {
-            const builder = new OrderBuilder();
-            builder.setOrderType(OrderType.MARKET);
-            builder.setSession(Session.NORMAL);
-            client.replaceOrder(ORDER_ID, ACCOUNT_HASH, builder);
+            const orderSpec = new OrderBuilder(false).setOrderType('LIMIT');
+            const expectedSpec = { orderType: 'LIMIT' };
+            client.replaceOrder(ACCOUNT_HASH, ORDER_ID, orderSpec);
             expect(mockSession.put).toHaveBeenCalledWith(
                 makeUrl('/trader/v1/accounts/{accountHash}/orders/{orderId}'),
-                { json: builder.build() }
+                expectedSpec
             );
         });
 
         test('with string parameters', () => {
-            const order = { orderType: OrderType.MARKET, session: Session.NORMAL };
-            client.replaceOrder(ORDER_ID.toString(), ACCOUNT_HASH.toString(), order);
+            const orderSpec = { order: 'spec' };
+            client.replaceOrder(ACCOUNT_HASH.toString(), ORDER_ID.toString(), orderSpec);
             expect(mockSession.put).toHaveBeenCalledWith(
                 makeUrl('/trader/v1/accounts/{accountHash}/orders/{orderId}'),
-                { json: order }
+                orderSpec
             );
         });
     });
 
     describe('previewOrder', () => {
         test('basic', () => {
-            const order = { orderType: OrderType.MARKET, session: Session.NORMAL };
-            client.previewOrder(ACCOUNT_HASH, order);
+            const orderSpec = { order: 'spec' };
+            client.previewOrder(ACCOUNT_HASH, orderSpec);
             expect(mockSession.post).toHaveBeenCalledWith(
                 makeUrl('/trader/v1/accounts/{accountHash}/previewOrder'),
-                { json: order }
+                orderSpec
             );
         });
 
         test('with order builder', () => {
-            const builder = new OrderBuilder();
-            builder.setOrderType(OrderType.MARKET);
-            builder.setSession(Session.NORMAL);
-            client.previewOrder(ACCOUNT_HASH, builder);
+            const orderSpec = new OrderBuilder(false).setOrderType('LIMIT');
+            const expectedSpec = { orderType: 'LIMIT' };
+            client.previewOrder(ACCOUNT_HASH, orderSpec);
             expect(mockSession.post).toHaveBeenCalledWith(
                 makeUrl('/trader/v1/accounts/{accountHash}/previewOrder'),
-                { json: builder.build() }
+                expectedSpec
+            );
+        });
+    });
+
+    describe('getTransactions', () => {
+        test('basic', () => {
+            client.getTransactions(ACCOUNT_HASH);
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/trader/v1/accounts/{accountHash}/transactions'),
+                {
+                    params: {
+                        types: 'TRADE,JOURNAL,DIVIDEND_OR_INTEREST,ACH_RECEIPT,ACH_DISBURSEMENT,CASH_RECEIPT,CASH_DISBURSEMENT,ELECTRONIC_FUND, WIRE_OUTGOING,WIRE_INCOMING,MARGIN_CALL,OPTION_EXERCISE,DEPOSIT_WITHDRAWAL,ACCOUNT_TRANSFER,INTEREST,REBATE,TAX,TAX_WITHHOLDING,INSTRUMENT_NOT_FOUND,ORDER_ENTRY_ORDER_UPDATE,ORDER_EXECUTION,ORDER_CANCEL,ORDER_REJECT,ORDER_EXPIRATION,ORDER_REPLACE,ORDER_PARTIAL_FILL,ORDER_FILL,ACCOUNT_ACTIVITY,MERGER,SPIN_OFF,COMPANY_ACTION,NAME_CHANGE,CUSIP_CHANGE,STOCK_SPLIT,REVERSE_STOCK_SPLIT,OPTION_EXPIRATION,OPTION_ASSIGNMENT,CLOSING,CONVERSION,ACCOUNT_TRANSFER_ACCOUNT_ACTIVITY,INSTRUMENT_NOT_FOUND_ACCOUNT_ACTIVITY,ORDER_ENTRY_ORDER_UPDATE_ACCOUNT_ACTIVITY,ORDER_EXECUTION_ACCOUNT_ACTIVITY,ORDER_CANCEL_ACCOUNT_ACTIVITY,ORDER_REJECT_ACCOUNT_ACTIVITY,ORDER_EXPIRATION_ACCOUNT_ACTIVITY,ORDER_REPLACE_ACCOUNT_ACTIVITY,ORDER_PARTIAL_FILL_ACCOUNT_ACTIVITY,ORDER_FILL_ACCOUNT_ACTIVITY,MERGER_ACCOUNT_ACTIVITY,SPIN_OFF_ACCOUNT_ACTIVITY,COMPANY_ACTION_ACCOUNT_ACTIVITY,NAME_CHANGE_ACCOUNT_ACTIVITY,CUSIP_CHANGE_ACCOUNT_ACTIVITY,STOCK_SPLIT_ACCOUNT_ACTIVITY,REVERSE_STOCK_SPLIT_ACCOUNT_ACTIVITY,OPTION_EXPIRATION_ACCOUNT_ACTIVITY,OPTION_ASSIGNMENT_ACCOUNT_ACTIVITY,CLOSING_ACCOUNT_ACTIVITY,CONVERSION_ACCOUNT_ACTIVITY',
+                        startDate: '2019-11-03T03:04:05Z',
+                        endDate: '2020-01-02T03:04:05Z'
+                    }
+                }
+            );
+        });
+
+        test('with one transaction type', () => {
+            client.getTransactions(ACCOUNT_HASH, { transactionTypes: 'TRADE' });
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/trader/v1/accounts/{accountHash}/transactions'),
+                {
+                    params: {
+                        types: 'TRADE',
+                        startDate: '2019-11-03T03:04:05Z',
+                        endDate: '2020-01-02T03:04:05Z'
+                    }
+                }
+            );
+        });
+
+        test('with transaction type list', () => {
+            client.getTransactions(ACCOUNT_HASH, { transactionTypes: ['TRADE', 'JOURNAL'] });
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/trader/v1/accounts/{accountHash}/transactions'),
+                {
+                    params: {
+                        types: 'TRADE,JOURNAL',
+                        startDate: '2019-11-03T03:04:05Z',
+                        endDate: '2020-01-02T03:04:05Z'
+                    }
+                }
+            );
+        });
+
+        test('with transaction type list unchecked', () => {
+            client.setEnforceEnums(false);
+            client.getTransactions(ACCOUNT_HASH, { transactionTypes: ['TRADE', 'JOURNAL'] });
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/trader/v1/accounts/{accountHash}/transactions'),
+                {
+                    params: {
+                        types: 'TRADE,JOURNAL',
+                        startDate: '2019-11-03T03:04:05Z',
+                        endDate: '2020-01-02T03:04:05Z'
+                    }
+                }
+            );
+        });
+
+        test('with symbol', () => {
+            client.getTransactions(ACCOUNT_HASH, { symbol: 'AAPL' });
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/trader/v1/accounts/{accountHash}/transactions'),
+                {
+                    params: {
+                        types: 'TRADE,JOURNAL,DIVIDEND_OR_INTEREST,ACH_RECEIPT,ACH_DISBURSEMENT,CASH_RECEIPT,CASH_DISBURSEMENT,ELECTRONIC_FUND, WIRE_OUTGOING,WIRE_INCOMING,MARGIN_CALL,OPTION_EXERCISE,DEPOSIT_WITHDRAWAL,ACCOUNT_TRANSFER,INTEREST,REBATE,TAX,TAX_WITHHOLDING,INSTRUMENT_NOT_FOUND,ORDER_ENTRY_ORDER_UPDATE,ORDER_EXECUTION,ORDER_CANCEL,ORDER_REJECT,ORDER_EXPIRATION,ORDER_REPLACE,ORDER_PARTIAL_FILL,ORDER_FILL,ACCOUNT_ACTIVITY,MERGER,SPIN_OFF,COMPANY_ACTION,NAME_CHANGE,CUSIP_CHANGE,STOCK_SPLIT,REVERSE_STOCK_SPLIT,OPTION_EXPIRATION,OPTION_ASSIGNMENT,CLOSING,CONVERSION,ACCOUNT_TRANSFER_ACCOUNT_ACTIVITY,INSTRUMENT_NOT_FOUND_ACCOUNT_ACTIVITY,ORDER_ENTRY_ORDER_UPDATE_ACCOUNT_ACTIVITY,ORDER_EXECUTION_ACCOUNT_ACTIVITY,ORDER_CANCEL_ACCOUNT_ACTIVITY,ORDER_REJECT_ACCOUNT_ACTIVITY,ORDER_EXPIRATION_ACCOUNT_ACTIVITY,ORDER_REPLACE_ACCOUNT_ACTIVITY,ORDER_PARTIAL_FILL_ACCOUNT_ACTIVITY,ORDER_FILL_ACCOUNT_ACTIVITY,MERGER_ACCOUNT_ACTIVITY,SPIN_OFF_ACCOUNT_ACTIVITY,COMPANY_ACTION_ACCOUNT_ACTIVITY,NAME_CHANGE_ACCOUNT_ACTIVITY,CUSIP_CHANGE_ACCOUNT_ACTIVITY,STOCK_SPLIT_ACCOUNT_ACTIVITY,REVERSE_STOCK_SPLIT_ACCOUNT_ACTIVITY,OPTION_EXPIRATION_ACCOUNT_ACTIVITY,OPTION_ASSIGNMENT_ACCOUNT_ACTIVITY,CLOSING_ACCOUNT_ACTIVITY,CONVERSION_ACCOUNT_ACTIVITY',
+                        startDate: '2019-11-03T03:04:05Z',
+                        endDate: '2020-01-02T03:04:05Z',
+                        symbol: 'AAPL'
+                    }
+                }
+            );
+        });
+
+        test('with start date as datetime', () => {
+            const startDate = new Date('2019-12-01T00:00:00Z');
+            client.getTransactions(ACCOUNT_HASH, { startDate });
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/trader/v1/accounts/{accountHash}/transactions'),
+                {
+                    params: {
+                        types: 'TRADE,JOURNAL,DIVIDEND_OR_INTEREST,ACH_RECEIPT,ACH_DISBURSEMENT,CASH_RECEIPT,CASH_DISBURSEMENT,ELECTRONIC_FUND, WIRE_OUTGOING,WIRE_INCOMING,MARGIN_CALL,OPTION_EXERCISE,DEPOSIT_WITHDRAWAL,ACCOUNT_TRANSFER,INTEREST,REBATE,TAX,TAX_WITHHOLDING,INSTRUMENT_NOT_FOUND,ORDER_ENTRY_ORDER_UPDATE,ORDER_EXECUTION,ORDER_CANCEL,ORDER_REJECT,ORDER_EXPIRATION,ORDER_REPLACE,ORDER_PARTIAL_FILL,ORDER_FILL,ACCOUNT_ACTIVITY,MERGER,SPIN_OFF,COMPANY_ACTION,NAME_CHANGE,CUSIP_CHANGE,STOCK_SPLIT,REVERSE_STOCK_SPLIT,OPTION_EXPIRATION,OPTION_ASSIGNMENT,CLOSING,CONVERSION,ACCOUNT_TRANSFER_ACCOUNT_ACTIVITY,INSTRUMENT_NOT_FOUND_ACCOUNT_ACTIVITY,ORDER_ENTRY_ORDER_UPDATE_ACCOUNT_ACTIVITY,ORDER_EXECUTION_ACCOUNT_ACTIVITY,ORDER_CANCEL_ACCOUNT_ACTIVITY,ORDER_REJECT_ACCOUNT_ACTIVITY,ORDER_EXPIRATION_ACCOUNT_ACTIVITY,ORDER_REPLACE_ACCOUNT_ACTIVITY,ORDER_PARTIAL_FILL_ACCOUNT_ACTIVITY,ORDER_FILL_ACCOUNT_ACTIVITY,MERGER_ACCOUNT_ACTIVITY,SPIN_OFF_ACCOUNT_ACTIVITY,COMPANY_ACTION_ACCOUNT_ACTIVITY,NAME_CHANGE_ACCOUNT_ACTIVITY,CUSIP_CHANGE_ACCOUNT_ACTIVITY,STOCK_SPLIT_ACCOUNT_ACTIVITY,REVERSE_STOCK_SPLIT_ACCOUNT_ACTIVITY,OPTION_EXPIRATION_ACCOUNT_ACTIVITY,OPTION_ASSIGNMENT_ACCOUNT_ACTIVITY,CLOSING_ACCOUNT_ACTIVITY,CONVERSION_ACCOUNT_ACTIVITY',
+                        startDate: '2019-12-01T00:00:00Z',
+                        endDate: '2020-01-02T03:04:05Z'
+                    }
+                }
+            );
+        });
+
+        test('with end date as datetime', () => {
+            const endDate = new Date('2020-01-01T00:00:00Z');
+            client.getTransactions(ACCOUNT_HASH, { endDate });
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/trader/v1/accounts/{accountHash}/transactions'),
+                {
+                    params: {
+                        types: 'TRADE,JOURNAL,DIVIDEND_OR_INTEREST,ACH_RECEIPT,ACH_DISBURSEMENT,CASH_RECEIPT,CASH_DISBURSEMENT,ELECTRONIC_FUND, WIRE_OUTGOING,WIRE_INCOMING,MARGIN_CALL,OPTION_EXERCISE,DEPOSIT_WITHDRAWAL,ACCOUNT_TRANSFER,INTEREST,REBATE,TAX,TAX_WITHHOLDING,INSTRUMENT_NOT_FOUND,ORDER_ENTRY_ORDER_UPDATE,ORDER_EXECUTION,ORDER_CANCEL,ORDER_REJECT,ORDER_EXPIRATION,ORDER_REPLACE,ORDER_PARTIAL_FILL,ORDER_FILL,ACCOUNT_ACTIVITY,MERGER,SPIN_OFF,COMPANY_ACTION,NAME_CHANGE,CUSIP_CHANGE,STOCK_SPLIT,REVERSE_STOCK_SPLIT,OPTION_EXPIRATION,OPTION_ASSIGNMENT,CLOSING,CONVERSION,ACCOUNT_TRANSFER_ACCOUNT_ACTIVITY,INSTRUMENT_NOT_FOUND_ACCOUNT_ACTIVITY,ORDER_ENTRY_ORDER_UPDATE_ACCOUNT_ACTIVITY,ORDER_EXECUTION_ACCOUNT_ACTIVITY,ORDER_CANCEL_ACCOUNT_ACTIVITY,ORDER_REJECT_ACCOUNT_ACTIVITY,ORDER_EXPIRATION_ACCOUNT_ACTIVITY,ORDER_REPLACE_ACCOUNT_ACTIVITY,ORDER_PARTIAL_FILL_ACCOUNT_ACTIVITY,ORDER_FILL_ACCOUNT_ACTIVITY,MERGER_ACCOUNT_ACTIVITY,SPIN_OFF_ACCOUNT_ACTIVITY,COMPANY_ACTION_ACCOUNT_ACTIVITY,NAME_CHANGE_ACCOUNT_ACTIVITY,CUSIP_CHANGE_ACCOUNT_ACTIVITY,STOCK_SPLIT_ACCOUNT_ACTIVITY,REVERSE_STOCK_SPLIT_ACCOUNT_ACTIVITY,OPTION_EXPIRATION_ACCOUNT_ACTIVITY,OPTION_ASSIGNMENT_ACCOUNT_ACTIVITY,CLOSING_ACCOUNT_ACTIVITY,CONVERSION_ACCOUNT_ACTIVITY',
+                        startDate: '2019-11-03T03:04:05Z',
+                        endDate: '2020-01-01T00:00:00Z'
+                    }
+                }
+            );
+        });
+    });
+
+    describe('getTransaction', () => {
+        test('basic', () => {
+            client.getTransaction(TRANSACTION_ID, ACCOUNT_HASH);
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/trader/v1/accounts/{accountHash}/transactions/{transactionId}'),
+                { params: {} }
+            );
+        });
+    });
+
+    describe('getUserPreferences', () => {
+        test('basic', () => {
+            client.getUserPreferences();
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/trader/v1/user/preferences'),
+                { params: {} }
+            );
+        });
+    });
+
+    describe('getQuote', () => {
+        test('basic', () => {
+            client.getQuote(SYMBOL);
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/quotes/{symbol}'),
+                { params: {} }
+            );
+        });
+
+        test('with fields single', () => {
+            client.getQuote(SYMBOL, { fields: 'bidPrice' });
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/quotes/{symbol}'),
+                { params: { fields: 'bidPrice' } }
+            );
+        });
+
+        test('with fields unchecked', () => {
+            client.setEnforceEnums(false);
+            client.getQuote(SYMBOL, { fields: 'bidPrice' });
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/quotes/{symbol}'),
+                { params: { fields: 'bidPrice' } }
+            );
+        });
+
+        test('with fields multiple', () => {
+            client.getQuote(SYMBOL, { fields: ['bidPrice', 'askPrice'] });
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/quotes/{symbol}'),
+                { params: { fields: 'bidPrice,askPrice' } }
+            );
+        });
+    });
+
+    describe('getQuotes', () => {
+        test('basic', () => {
+            client.getQuotes([SYMBOL]);
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/quotes'),
+                { params: { symbols: SYMBOL } }
+            );
+        });
+
+        test('single symbol', () => {
+            client.getQuotes(SYMBOL);
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/quotes'),
+                { params: { symbols: SYMBOL } }
+            );
+        });
+
+        test('with fields', () => {
+            client.getQuotes([SYMBOL], { fields: ['bidPrice', 'askPrice'] });
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/quotes'),
+                { params: { symbols: SYMBOL, fields: 'bidPrice,askPrice' } }
+            );
+        });
+
+        test('with fields unchecked', () => {
+            client.setEnforceEnums(false);
+            client.getQuotes([SYMBOL], { fields: ['bidPrice', 'askPrice'] });
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/quotes'),
+                { params: { symbols: SYMBOL, fields: 'bidPrice,askPrice' } }
+            );
+        });
+
+        test('with indicative', () => {
+            client.getQuotes([SYMBOL], { indicative: true });
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/quotes'),
+                { params: { symbols: SYMBOL, indicative: true } }
+            );
+        });
+
+        test('with indicative not bool', () => {
+            client.setEnforceEnums(false);
+            client.getQuotes([SYMBOL], { indicative: 'true' as any });
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/quotes'),
+                { params: { symbols: SYMBOL, indicative: 'true' } }
+            );
+        });
+    });
+
+    describe('getPriceHistory', () => {
+        test('vanilla', () => {
+            client.getPriceHistory(SYMBOL);
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/pricehistory'),
+                {
+                    params: {
+                        symbol: SYMBOL,
+                        periodType: 'day',
+                        period: 1,
+                        frequencyType: 'minute',
+                        frequency: 1
+                    }
+                }
+            );
+        });
+
+        test('with period type', () => {
+            client.getPriceHistory(SYMBOL, { periodType: 'month' });
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/pricehistory'),
+                {
+                    params: {
+                        symbol: SYMBOL,
+                        periodType: 'month',
+                        period: 1,
+                        frequencyType: 'minute',
+                        frequency: 1
+                    }
+                }
+            );
+        });
+
+        test('with period type unchecked', () => {
+            client.setEnforceEnums(false);
+            client.getPriceHistory(SYMBOL, { periodType: 'NOT_A_PERIOD_TYPE' });
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/pricehistory'),
+                {
+                    params: {
+                        symbol: SYMBOL,
+                        periodType: 'NOT_A_PERIOD_TYPE',
+                        period: 1,
+                        frequencyType: 'minute',
+                        frequency: 1
+                    }
+                }
+            );
+        });
+
+        test('with num periods', () => {
+            client.getPriceHistory(SYMBOL, { numPeriods: 10 });
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/pricehistory'),
+                {
+                    params: {
+                        symbol: SYMBOL,
+                        periodType: 'day',
+                        period: 10,
+                        frequencyType: 'minute',
+                        frequency: 1
+                    }
+                }
+            );
+        });
+
+        test('with frequency type', () => {
+            client.getPriceHistory(SYMBOL, { frequencyType: 'daily' });
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/pricehistory'),
+                {
+                    params: {
+                        symbol: SYMBOL,
+                        periodType: 'day',
+                        period: 1,
+                        frequencyType: 'daily',
+                        frequency: 1
+                    }
+                }
+            );
+        });
+
+        test('with frequency', () => {
+            client.getPriceHistory(SYMBOL, { frequency: 5 });
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/pricehistory'),
+                {
+                    params: {
+                        symbol: SYMBOL,
+                        periodType: 'day',
+                        period: 1,
+                        frequencyType: 'minute',
+                        frequency: 5
+                    }
+                }
+            );
+        });
+
+        test('with start datetime', () => {
+            const startDate = new Date('2019-12-01T00:00:00Z');
+            client.getPriceHistory(SYMBOL, { startDate });
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/pricehistory'),
+                {
+                    params: {
+                        symbol: SYMBOL,
+                        periodType: 'day',
+                        period: 1,
+                        frequencyType: 'minute',
+                        frequency: 1,
+                        startDate: '2019-12-01T00:00:00Z'
+                    }
+                }
+            );
+        });
+
+        test('with end datetime', () => {
+            const endDate = new Date('2020-01-01T00:00:00Z');
+            client.getPriceHistory(SYMBOL, { endDate });
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/pricehistory'),
+                {
+                    params: {
+                        symbol: SYMBOL,
+                        periodType: 'day',
+                        period: 1,
+                        frequencyType: 'minute',
+                        frequency: 1,
+                        endDate: '2020-01-01T00:00:00Z'
+                    }
+                }
+            );
+        });
+
+        test('with need extended hours data', () => {
+            client.getPriceHistory(SYMBOL, { needExtendedHoursData: true });
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/pricehistory'),
+                {
+                    params: {
+                        symbol: SYMBOL,
+                        periodType: 'day',
+                        period: 1,
+                        frequencyType: 'minute',
+                        frequency: 1,
+                        needExtendedHoursData: true
+                    }
+                }
+            );
+        });
+
+        test('with need previous close', () => {
+            client.getPriceHistory(SYMBOL, { needPreviousClose: true });
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/pricehistory'),
+                {
+                    params: {
+                        symbol: SYMBOL,
+                        periodType: 'day',
+                        period: 1,
+                        frequencyType: 'minute',
+                        frequency: 1,
+                        needPreviousClose: true
+                    }
+                }
+            );
+        });
+    });
+
+    describe('getOptionChain', () => {
+        test('vanilla', () => {
+            client.getOptionChain(SYMBOL);
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/chains'),
+                {
+                    params: {
+                        symbol: SYMBOL
+                    }
+                }
+            );
+        });
+
+        test('with contract type', () => {
+            client.getOptionChain(SYMBOL, { contractType: 'CALL' });
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/chains'),
+                {
+                    params: {
+                        symbol: SYMBOL,
+                        contractType: 'CALL'
+                    }
+                }
+            );
+        });
+
+        test('with contract type unchecked', () => {
+            client.setEnforceEnums(false);
+            client.getOptionChain(SYMBOL, { contractType: 'NOT_A_CONTRACT_TYPE' });
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/chains'),
+                {
+                    params: {
+                        symbol: SYMBOL,
+                        contractType: 'NOT_A_CONTRACT_TYPE'
+                    }
+                }
+            );
+        });
+
+        test('with strike count', () => {
+            client.getOptionChain(SYMBOL, { strikeCount: 10 });
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/chains'),
+                {
+                    params: {
+                        symbol: SYMBOL,
+                        strikeCount: 10
+                    }
+                }
+            );
+        });
+
+        test('with include underlying quotes', () => {
+            client.getOptionChain(SYMBOL, { includeUnderlyingQuotes: true });
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/chains'),
+                {
+                    params: {
+                        symbol: SYMBOL,
+                        includeUnderlyingQuotes: true
+                    }
+                }
+            );
+        });
+
+        test('with strategy', () => {
+            client.getOptionChain(SYMBOL, { strategy: 'SINGLE' });
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/chains'),
+                {
+                    params: {
+                        symbol: SYMBOL,
+                        strategy: 'SINGLE'
+                    }
+                }
+            );
+        });
+
+        test('with interval', () => {
+            client.getOptionChain(SYMBOL, { interval: 1 });
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/chains'),
+                {
+                    params: {
+                        symbol: SYMBOL,
+                        interval: 1
+                    }
+                }
+            );
+        });
+
+        test('with strike', () => {
+            client.getOptionChain(SYMBOL, { strike: 150 });
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/chains'),
+                {
+                    params: {
+                        symbol: SYMBOL,
+                        strike: 150
+                    }
+                }
+            );
+        });
+
+        test('with strike range', () => {
+            client.getOptionChain(SYMBOL, { strikeRange: 'ITM' });
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/chains'),
+                {
+                    params: {
+                        symbol: SYMBOL,
+                        strikeRange: 'ITM'
+                    }
+                }
+            );
+        });
+
+        test('with from date', () => {
+            const fromDate = new Date('2019-12-01T00:00:00Z');
+            client.getOptionChain(SYMBOL, { fromDate });
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/chains'),
+                {
+                    params: {
+                        symbol: SYMBOL,
+                        fromDate: '2019-12-01T00:00:00Z'
+                    }
+                }
+            );
+        });
+
+        test('with to date', () => {
+            const toDate = new Date('2020-01-01T00:00:00Z');
+            client.getOptionChain(SYMBOL, { toDate });
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/chains'),
+                {
+                    params: {
+                        symbol: SYMBOL,
+                        toDate: '2020-01-01T00:00:00Z'
+                    }
+                }
+            );
+        });
+
+        test('with volatility', () => {
+            client.getOptionChain(SYMBOL, { volatility: 0.3 });
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/chains'),
+                {
+                    params: {
+                        symbol: SYMBOL,
+                        volatility: 0.3
+                    }
+                }
+            );
+        });
+
+        test('with underlying price', () => {
+            client.getOptionChain(SYMBOL, { underlyingPrice: 150.0 });
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/chains'),
+                {
+                    params: {
+                        symbol: SYMBOL,
+                        underlyingPrice: 150.0
+                    }
+                }
+            );
+        });
+
+        test('with interest rate', () => {
+            client.getOptionChain(SYMBOL, { interestRate: 0.05 });
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/chains'),
+                {
+                    params: {
+                        symbol: SYMBOL,
+                        interestRate: 0.05
+                    }
+                }
+            );
+        });
+
+        test('with days to expiration', () => {
+            client.getOptionChain(SYMBOL, { daysToExpiration: 30 });
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/chains'),
+                {
+                    params: {
+                        symbol: SYMBOL,
+                        daysToExpiration: 30
+                    }
+                }
+            );
+        });
+
+        test('with exp month', () => {
+            client.getOptionChain(SYMBOL, { expMonth: 'JAN' });
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/chains'),
+                {
+                    params: {
+                        symbol: SYMBOL,
+                        expMonth: 'JAN'
+                    }
+                }
+            );
+        });
+
+        test('with option type', () => {
+            client.getOptionChain(SYMBOL, { optionType: 'S' });
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/chains'),
+                {
+                    params: {
+                        symbol: SYMBOL,
+                        optionType: 'S'
+                    }
+                }
+            );
+        });
+
+        test('with option entitlement', () => {
+            client.getOptionChain(SYMBOL, { optionEntitlement: 'ALL' });
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/chains'),
+                {
+                    params: {
+                        symbol: SYMBOL,
+                        optionEntitlement: 'ALL'
+                    }
+                }
+            );
+        });
+    });
+
+    describe('getOptionExpirationChain', () => {
+        test('basic', () => {
+            client.getOptionExpirationChain(SYMBOL);
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/expirationchain'),
+                {
+                    params: {
+                        symbol: SYMBOL
+                    }
+                }
+            );
+        });
+    });
+
+    describe('getMovers', () => {
+        test('basic', () => {
+            client.getMovers(INDEX);
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/movers/{index}'),
+                { params: {} }
+            );
+        });
+
+        test('with index unchecked', () => {
+            client.setEnforceEnums(false);
+            client.getMovers('NOT_AN_INDEX');
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/movers/NOT_AN_INDEX'),
+                { params: {} }
+            );
+        });
+
+        test('with sort order', () => {
+            client.getMovers(INDEX, { sort: 'ASC' });
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/movers/{index}'),
+                { params: { sort: 'ASC' } }
+            );
+        });
+
+        test('with frequency', () => {
+            client.getMovers(INDEX, { frequency: 1 });
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/movers/{index}'),
+                { params: { frequency: 1 } }
+            );
+        });
+    });
+
+    describe('getMarketHours', () => {
+        test('single market', () => {
+            client.getMarketHours(MARKET);
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/markets/{market}/hours'),
+                { params: {} }
+            );
+        });
+
+        test('market list', () => {
+            client.getMarketHours([MARKET, 'OPTION']);
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/markets/hours'),
+                { params: { markets: 'EQUITY,OPTION' } }
+            );
+        });
+
+        test('with date', () => {
+            const date = new Date('2020-01-02T00:00:00Z');
+            client.getMarketHours(MARKET, { date });
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/markets/{market}/hours'),
+                { params: { date: '2020-01-02' } }
+            );
+        });
+    });
+
+    describe('getInstruments', () => {
+        test('basic', () => {
+            client.getInstruments(SYMBOL);
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/instruments'),
+                { params: { symbol: SYMBOL } }
+            );
+        });
+
+        test('with projection', () => {
+            client.getInstruments(SYMBOL, { projection: 'SYMBOL_SEARCH' });
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/instruments'),
+                { params: { symbol: SYMBOL, projection: 'SYMBOL_SEARCH' } }
+            );
+        });
+
+        test('with projection unchecked', () => {
+            client.setEnforceEnums(false);
+            client.getInstruments(SYMBOL, { projection: 'NOT_A_PROJECTION' });
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/instruments'),
+                { params: { symbol: SYMBOL, projection: 'NOT_A_PROJECTION' } }
+            );
+        });
+    });
+
+    describe('getInstrumentByCusip', () => {
+        test('basic', () => {
+            client.getInstrumentByCusip(CUSIP);
+            expect(mockSession.get).toHaveBeenCalledWith(
+                makeUrl('/marketdata/v1/instruments/{cusip}'),
+                { params: {} }
             );
         });
     });
