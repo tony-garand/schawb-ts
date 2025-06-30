@@ -4,6 +4,7 @@ import { AccountsAPI } from './api/accounts';
 import { OrdersAPI, OrderQueryParams } from './api/orders';
 import { TransactionsAPI, TransactionQueryParams, Transaction, TransactionType } from './api/transactions';
 import { UserPreferenceAPI } from './api/userPreference';
+import { MarketDataAPI, QuoteRequestParams, QuoteResponse, MarketDataQuote, OptionChainRequestParams, OptionChainResponse, OptionExpirationChainResponse, PriceHistoryRequestParams, PriceHistoryResponse, PeriodType, FrequencyType, MoversResponse, MarketHoursRequestParams, MarketHoursResponse, MarketType, MoversRequestParams, MoversSymbolId, MoversSort, MoversFrequency, InstrumentsRequestParams, InstrumentsResponse, Instrument, InstrumentProjection } from './api/marketData';
 import { 
   SchwabClientConfig, 
   OAuthConfig, 
@@ -25,6 +26,7 @@ export class SchwabClient {
   public accounts: AccountsAPI;
   public transactions: TransactionsAPI;
   public userPreference: UserPreferenceAPI;
+  public marketData: MarketDataAPI;
   private tradingAPI: SchwabTradingAPI;
   private config: SchwabClientConfig;
 
@@ -43,6 +45,7 @@ export class SchwabClient {
     this.orders = new OrdersAPI(this.oauth, config.environment);
     this.transactions = new TransactionsAPI(this.oauth, config.environment);
     this.userPreference = new UserPreferenceAPI(this.oauth, config.environment);
+    this.marketData = new MarketDataAPI(this.oauth, config.environment);
   }
 
   // OAuth Methods
@@ -210,6 +213,42 @@ export class SchwabClient {
    */
   public async getQuotes(symbols: string[]): Promise<Quote[]> {
     return this.tradingAPI.getQuotes(symbols);
+  }
+
+  // Market Data API Methods
+  /**
+   * Get market data quotes by list of symbols
+   * @param params Query parameters for the quote request
+   * @returns Promise with quote response object
+   */
+  public async getMarketDataQuotes(params: QuoteRequestParams): Promise<QuoteResponse> {
+    return this.marketData.getQuotes(params);
+  }
+
+  /**
+   * Get market data quote by single symbol
+   * @param symbolId The symbol to get quote for
+   * @param fields Optional comma-separated list of fields to include
+   * @returns Promise with quote data for the symbol
+   */
+  public async getMarketDataQuoteBySymbol(symbolId: string, fields?: string): Promise<MarketDataQuote> {
+    return this.marketData.getQuoteBySymbol(symbolId, fields);
+  }
+
+  /**
+   * Get market data quotes for multiple symbols with convenience method
+   * @param symbols Array of symbols to get quotes for
+   * @param options Optional parameters for the request
+   * @returns Promise with quote response object
+   */
+  public async getMarketDataQuotesForSymbols(
+    symbols: string[], 
+    options?: {
+      fields?: string;
+      indicative?: boolean;
+    }
+  ): Promise<QuoteResponse> {
+    return this.marketData.getQuotesForSymbols(symbols, options);
   }
 
   /**
@@ -556,5 +595,153 @@ export class SchwabClient {
    */
   public async getSchwabClientFunctionId(): Promise<string | null> {
     return this.userPreference.getSchwabClientFunctionId();
+  }
+
+  /**
+   * Get option chains for a symbol
+   * @param params Query parameters for the option chain request
+   * @returns Promise<OptionChainResponse>
+   */
+  public async getOptionChains(params: OptionChainRequestParams): Promise<OptionChainResponse> {
+    return this.marketData.getOptionChains(params);
+  }
+
+  /**
+   * Get option expiration chain for a symbol
+   * @param symbol The symbol to get expiration chain for
+   * @returns Promise<OptionExpirationChainResponse>
+   */
+  public async getOptionExpirationChain(symbol: string): Promise<OptionExpirationChainResponse> {
+    return this.marketData.getOptionExpirationChain(symbol);
+  }
+
+  /**
+   * Get price history for a symbol
+   * @param params Query parameters for the price history request
+   * @returns Promise<PriceHistoryResponse>
+   */
+  public async getPriceHistory(params: PriceHistoryRequestParams): Promise<PriceHistoryResponse> {
+    return this.marketData.getPriceHistory(params);
+  }
+
+  /**
+   * Get price history with convenience method for common use cases
+   * @param symbol The symbol to get price history for
+   * @param periodType The chart period type
+   * @param period The number of periods
+   * @param options Additional options
+   * @returns Promise<PriceHistoryResponse>
+   */
+  public async getPriceHistoryForSymbol(
+    symbol: string,
+    periodType: PeriodType = 'day',
+    period: number = 10,
+    options?: {
+      frequencyType?: FrequencyType;
+      frequency?: number;
+      startDate?: number;
+      endDate?: number;
+      needExtendedHoursData?: boolean;
+      needPreviousClose?: boolean;
+    }
+  ): Promise<PriceHistoryResponse> {
+    return this.marketData.getPriceHistoryForSymbol(symbol, periodType, period, options);
+  }
+
+  /**
+   * Get movers for a specific index
+   * @param params Query parameters for the movers request
+   * @returns Promise<MoversResponse>
+   */
+  public async getMovers(params: MoversRequestParams): Promise<MoversResponse> {
+    return this.marketData.getMovers(params);
+  }
+
+  /**
+   * Get movers with convenience method
+   * @param symbolId The index symbol to get movers for
+   * @param options Optional parameters for sorting and frequency
+   * @returns Promise<MoversResponse>
+   */
+  public async getMoversForIndex(
+    symbolId: MoversSymbolId,
+    options?: {
+      sort?: MoversSort;
+      frequency?: MoversFrequency;
+    }
+  ): Promise<MoversResponse> {
+    return this.marketData.getMoversForIndex(symbolId, options);
+  }
+
+  /**
+   * Get market hours for multiple markets
+   * @param params - Query parameters for the market hours request
+   * @returns Promise<MarketHoursResponse>
+   */
+  public async getMarketDataHours(params: MarketHoursRequestParams): Promise<MarketHoursResponse> {
+    return this.marketData.getMarketHours(params);
+  }
+
+  /**
+   * Get market hours for a single market
+   * @param marketId - The market ID to get hours for
+   * @param date - Optional date in YYYY-MM-DD format
+   * @returns Promise<MarketHoursResponse>
+   */
+  public async getMarketDataHoursForMarket(marketId: MarketType, date?: string): Promise<MarketHoursResponse> {
+    return this.marketData.getMarketHoursForMarket(marketId, date);
+  }
+
+  /**
+   * Get market hours with convenience method for common markets
+   * @param markets - Array of markets to get hours for
+   * @param date - Optional date in YYYY-MM-DD format
+   * @returns Promise<MarketHoursResponse>
+   */
+  public async getMarketDataHoursForMarkets(
+    markets: MarketType[],
+    date?: string
+  ): Promise<MarketHoursResponse> {
+    return this.marketData.getMarketHoursForMarkets(markets, date);
+  }
+
+  /**
+   * Get instruments by symbols and projections
+   * @param params - Query parameters for the instruments request
+   * @returns Promise<InstrumentsResponse>
+   */
+  public async getInstruments(params: InstrumentsRequestParams): Promise<InstrumentsResponse> {
+    return this.marketData.getInstruments(params);
+  }
+
+  /**
+   * Get instrument by specific CUSIP
+   * @param cusipId - The CUSIP of the security
+   * @returns Promise<Instrument>
+   */
+  public async getInstrumentByCusip(cusipId: string): Promise<Instrument> {
+    return this.marketData.getInstrumentByCusip(cusipId);
+  }
+
+  /**
+   * Get instruments with convenience method for symbol search
+   * @param symbol - The symbol to search for
+   * @param projection - The projection type (defaults to 'symbol-search')
+   * @returns Promise<InstrumentsResponse>
+   */
+  public async searchMarketDataInstruments(
+    symbol: string,
+    projection: InstrumentProjection = 'symbol-search'
+  ): Promise<InstrumentsResponse> {
+    return this.marketData.searchInstruments(symbol, projection);
+  }
+
+  /**
+   * Get instruments with fundamental projection
+   * @param symbol - The symbol to get fundamental data for
+   * @returns Promise<InstrumentsResponse>
+   */
+  public async getFundamentalInstruments(symbol: string): Promise<InstrumentsResponse> {
+    return this.marketData.getFundamentalInstruments(symbol);
   }
 } 

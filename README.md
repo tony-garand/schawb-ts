@@ -226,6 +226,11 @@ type InstructionType = 'BUY' | 'SELL' | 'BUY_TO_OPEN' | 'BUY_TO_COVER' | 'BUY_TO
 - `searchInstruments(symbol, projection?)` - Search for instruments
 - `getInstrument(symbol)` - Get instrument details
 
+#### Market Data API Methods (New)
+- `getMarketDataQuotes(params)` - Get market data quotes by list of symbols
+- `getMarketDataQuoteBySymbol(symbolId, fields?)` - Get market data quote by single symbol
+- `getMarketDataQuotesForSymbols(symbols, options?)` - Get market data quotes for multiple symbols with convenience method
+
 #### Order Builders
 - `createOrder()` - Create a new order builder
 - `createOrderLeg()` - Create a new order leg builder
@@ -1096,3 +1101,120 @@ for (const account of individualAccounts) {
 ```
 
 ## Transactions API 
+
+#### Market Data API Module
+
+The Market Data API provides comprehensive real-time market data capabilities. You can access it directly through `client.marketData`:
+
+```typescript
+// Access the market data module directly
+const marketDataAPI = client.marketData;
+
+// Get quotes for multiple symbols
+const quotes = await marketDataAPI.getQuotes({
+  symbols: 'AAPL,MSFT,GOOGL,TSLA',
+  fields: 'quote,reference,fundamental',
+  indicative: false
+});
+
+// Get quote for a single symbol
+const singleQuote = await marketDataAPI.getQuoteBySymbol('AAPL', 'quote,reference');
+
+// Get quotes using convenience method
+const convenienceQuotes = await marketDataAPI.getQuotesForSymbols(
+  ['AAPL', 'MSFT', 'GOOGL'],
+  {
+    fields: 'quote,reference',
+    indicative: true
+  }
+);
+```
+
+#### Market Data Query Parameters
+
+```typescript
+interface QuoteRequestParams {
+  symbols?: string;        // Comma-separated list of symbols
+  fields?: string;         // Comma-separated list of fields (quote, fundamental, extended, reference, regular)
+  indicative?: boolean;    // Include indicative symbol quotes for ETFs
+}
+```
+
+#### Supported Asset Types
+
+The Market Data API supports various asset types:
+
+- **EQUITY** - Common stocks, preferred stocks
+- **OPTION** - Stock options, index options
+- **FUTURE** - Futures contracts
+- **FOREX** - Foreign exchange pairs
+- **INDEX** - Market indices (S&P 500, Dow Jones, etc.)
+- **MUTUAL_FUND** - Mutual funds
+- **ETF** - Exchange-traded funds
+
+#### Quote Data Structure
+
+```typescript
+interface QuoteResponse {
+  [symbol: string]: {
+    assetMainType: string;
+    symbol: string;
+    quoteType?: string;
+    realtime: boolean;
+    ssid: number;
+    reference: {
+      cusip?: string;
+      description: string;
+      exchange: string;
+      exchangeName: string;
+      // ... additional reference fields
+    };
+    quote: {
+      lastPrice?: number;
+      bidPrice?: number;
+      askPrice?: number;
+      bidSize?: number;
+      askSize?: number;
+      netChange?: number;
+      netPercentChange?: number;
+      totalVolume?: number;
+      // ... additional quote fields
+    };
+    regular?: {
+      regularMarketLastPrice?: number;
+      regularMarketNetChange?: number;
+      regularMarketPercentChange?: number;
+      // ... additional regular market fields
+    };
+    fundamental?: {
+      peRatio?: number;
+      divYield?: number;
+      eps?: number;
+      // ... additional fundamental fields
+    };
+  };
+}
+```
+
+#### Example Usage
+
+```typescript
+// Get quotes for different asset types
+const mixedQuotes = await client.getMarketDataQuotes({
+  symbols: 'AAPL,SPY,TSLA 240315C00250000,EUR/USD',
+  fields: 'quote,reference'
+});
+
+// Process quote data
+for (const [symbol, quoteData] of Object.entries(mixedQuotes)) {
+  console.log(`Symbol: ${symbol}`);
+  console.log(`Asset Type: ${quoteData.assetMainType}`);
+  console.log(`Last Price: $${quoteData.quote?.lastPrice || 'N/A'}`);
+  console.log(`Change: ${quoteData.quote?.netChange || 0} (${quoteData.quote?.netPercentChange || 0}%)`);
+}
+
+// Filter quotes by asset type
+const equityQuotes = Object.fromEntries(
+  Object.entries(mixedQuotes).filter(([_, data]) => data.assetMainType === 'EQUITY')
+);
+``` 

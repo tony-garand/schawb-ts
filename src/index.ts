@@ -15,6 +15,40 @@ export type { AccountsAPI } from './api/accounts';
 export type { OrdersAPI, OrderQueryParams } from './api/orders';
 export type { TransactionsAPI, TransactionQueryParams } from './api/transactions';
 export type { UserPreferenceAPI } from './api/userPreference';
+export type {
+  MarketDataAPI,
+  QuoteRequestParams,
+  QuoteResponse,
+  MarketDataQuote,
+  MarketDataCandle,
+  OptionChainRequestParams,
+  OptionChainResponse,
+  OptionContract,
+  OptionDeliverable,
+  OptionChainExpDateMap,
+  OptionExpirationChainResponse,
+  OptionExpiration,
+  PriceHistoryRequestParams,
+  PriceHistoryResponse,
+  PeriodType,
+  FrequencyType,
+  MoversRequestParams,
+  MoversResponse,
+  MoversSymbolId,
+  MoversSort,
+  MoversFrequency,
+  Mover,
+  MarketHoursRequestParams,
+  MarketHoursResponse,
+  MarketType,
+  MarketHoursSession,
+  MarketHoursSessions,
+  MarketHoursProduct,
+  InstrumentsRequestParams,
+  InstrumentsResponse,
+  Instrument,
+  InstrumentProjection
+} from './api/marketData';
 
 // Types
 export type {
