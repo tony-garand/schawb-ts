@@ -1,143 +1,40 @@
 import { SchwabOAuth } from '../auth/oauth';
+import {
+  // Quote types
+  QuoteResponse,
+  QuoteResponseObject,
+  
+  // Option types
+  OptionChain,
+  ExpirationChain,
+  
+  // Instrument types
+  InstrumentsResponse,
+  Instrument,
+  
+  // Market hours types
+  MarketHoursResponse,
+  
+  // Movers types
+  MoversResponse,
+  
+  // Price history types
+  CandleList,
+  Candle,
+  
+  // New types
+  OptionDeliverables,
+  Expiration,
+  Screener
+} from '../types/schemas';
 
-// Market Data Types
-export interface MarketDataQuote {
-  symbol: string;
-  empty: boolean;
-  previousClose: number;
-  previousCloseDate: number;
-  candles: MarketDataCandle[];
-}
-
-export interface MarketDataCandle {
-  open: number;
-  high: number;
-  low: number;
-  close: number;
-  volume: number;
-  datetime: number;
-}
-
-export interface QuoteResponse {
-  [symbol: string]: {
-    assetMainType: string;
-    symbol: string;
-    quoteType?: string;
-    realtime: boolean;
-    ssid: number;
-    reference: {
-      cusip?: string;
-      description: string;
-      exchange: string;
-      exchangeName: string;
-      contractType?: string;
-      daysToExpiration?: number;
-      expirationDay?: number;
-      expirationMonth?: number;
-      expirationYear?: number;
-      isPennyPilot?: boolean;
-      lastTradingDay?: number;
-      multiplier?: number;
-      settlementType?: string;
-      strikePrice?: number;
-      underlying?: string;
-      uvExpirationType?: string;
-      otcMarketTier?: string;
-      futureActiveSymbol?: string;
-      futureExpirationDate?: number;
-      futureIsActive?: boolean;
-      futureIsTradable?: boolean;
-      futureMultiplier?: number;
-      futurePriceFormat?: string;
-      futureSettlementPrice?: number;
-      futureTradingHours?: string;
-      product?: string;
-      isTradable?: boolean;
-      marketMaker?: string;
-      tradingHours?: string;
-    };
-    quote: {
-      '52WeekHigh'?: number;
-      '52WeekLow'?: number;
-      askMICId?: string;
-      askPrice?: number;
-      askSize?: number;
-      askTime?: number;
-      bidMICId?: string;
-      bidPrice?: number;
-      bidSize?: number;
-      bidTime?: number;
-      closePrice?: number;
-      highPrice?: number;
-      lastMICId?: string;
-      lastPrice?: number;
-      lastSize?: number;
-      lowPrice?: number;
-      mark?: number;
-      markChange?: number;
-      markPercentChange?: number;
-      netChange?: number;
-      netPercentChange?: number;
-      openPrice?: number;
-      quoteTime?: number;
-      securityStatus?: string;
-      totalVolume?: number;
-      tradeTime?: number;
-      volatility?: number;
-      nAV?: number;
-      delta?: number;
-      gamma?: number;
-      impliedYield?: number;
-      indAskPrice?: number;
-      indBidPrice?: number;
-      indQuoteTime?: number;
-      moneyIntrinsicValue?: number;
-      openInterest?: number;
-      rho?: number;
-      theoreticalOptionValue?: number;
-      theta?: number;
-      timeValue?: number;
-      underlyingPrice?: number;
-      vega?: number;
-      futurePercentChange?: number;
-      settleTime?: number;
-      tick?: number;
-      tickAmount?: number;
-    };
-    regular?: {
-      regularMarketLastPrice?: number;
-      regularMarketLastSize?: number;
-      regularMarketNetChange?: number;
-      regularMarketPercentChange?: number;
-      regularMarketTradeTime?: number;
-    };
-    fundamental?: {
-      avg10DaysVolume?: number;
-      avg1YearVolume?: number;
-      declarationDate?: string;
-      divAmount?: number;
-      divExDate?: string;
-      divFreq?: number;
-      divPayAmount?: number;
-      divPayDate?: string;
-      divYield?: number;
-      eps?: number;
-      fundLeverageFactor?: number;
-      nextDivExDate?: string;
-      nextDivPayDate?: string;
-      peRatio?: number;
-      fundStrategy?: string;
-    };
-  };
-}
-
+// Request parameter types (not in schemas)
 export interface QuoteRequestParams {
   symbols?: string;
   fields?: string;
   indicative?: boolean;
 }
 
-// Option Chains Types
 export interface OptionChainRequestParams {
   symbol: string;
   contractType?: 'CALL' | 'PUT' | 'ALL';
@@ -158,132 +55,11 @@ export interface OptionChainRequestParams {
   entitlement?: 'PN'|'NP'|'PP';
 }
 
-export interface OptionDeliverable {
-  symbol: string;
-  assetType: string;
-  deliverableUnits: string;
-  currencyType: string;
-}
-
-export interface OptionContract {
-  putCall: 'PUT' | 'CALL';
-  symbol: string;
-  description: string;
-  exchangeName: string;
-  bidPrice: number;
-  askPrice: number;
-  lastPrice: number;
-  markPrice: number;
-  bidSize: number;
-  askSize: number;
-  lastSize: number;
-  highPrice: number;
-  lowPrice: number;
-  openPrice: number;
-  closePrice: number;
-  totalVolume: number;
-  tradeDate: number;
-  quoteTimeInLong: number;
-  tradeTimeInLong: number;
-  netChange: number;
-  volatility: number;
-  delta: number;
-  gamma: number;
-  theta: number;
-  vega: number;
-  rho: number;
-  timeValue: number;
-  openInterest: number;
-  isInTheMoney: boolean;
-  theoreticalOptionValue: number;
-  theoreticalVolatility: number;
-  isMini: boolean;
-  isNonStandard: boolean;
-  optionDeliverablesList: OptionDeliverable[];
-  strikePrice: number;
-  expirationDate: string;
-  daysToExpiration: number;
-  expirationType: string;
-  lastTradingDay: number;
-  multiplier: number;
-  settlementType: string;
-  deliverableNote: string;
-  isIndexOption: boolean;
-  percentChange: number;
-  markChange: number;
-  markPercentChange: number;
-  isPennyPilot: boolean;
-  intrinsicValue: number;
-  optionRoot: string;
-}
-
-export interface OptionChainExpDateMap {
-  [expiration: string]: {
-    [strike: string]: OptionContract;
-  };
-}
-
-export interface OptionChainResponse {
-  symbol: string;
-  status: string;
-  underlying: {
-    ask: number;
-    askSize: number;
-    bid: number;
-    bidSize: number;
-    change: number;
-    close: number;
-    delayed: boolean;
-    description: string;
-    exchangeName: string;
-    fiftyTwoWeekHigh: number;
-    fiftyTwoWeekLow: number;
-    highPrice: number;
-    last: number;
-    lowPrice: number;
-    mark: number;
-    markChange: number;
-    markPercentChange: number;
-    openPrice: number;
-    percentChange: number;
-    quoteTime: number;
-    symbol: string;
-    totalVolume: number;
-    tradeTime: number;
-  };
-  strategy: string;
-  interval: number;
-  isDelayed: boolean;
-  isIndex: boolean;
-  daysToExpiration: number;
-  interestRate: number;
-  underlyingPrice: number;
-  volatility: number;
-  callExpDateMap: OptionChainExpDateMap;
-  putExpDateMap: OptionChainExpDateMap;
-}
-
-// Option Expiration Chain Types
-export interface OptionExpiration {
-  expirationDate: string;
-  daysToExpiration: number;
-  expirationType: string;
-  standard: boolean;
-}
-
-export interface OptionExpirationChainResponse {
-  expirationList: OptionExpiration[];
-}
-
-// Price History Types
-export type PeriodType = 'day' | 'month' | 'year' | 'ytd';
-export type FrequencyType = 'minute' | 'daily' | 'weekly' | 'monthly';
-
 export interface PriceHistoryRequestParams {
   symbol: string;
-  periodType?: PeriodType;
+  periodType?: 'day' | 'month' | 'year' | 'ytd';
   period?: number;
-  frequencyType?: FrequencyType;
+  frequencyType?: 'minute' | 'daily' | 'weekly' | 'monthly';
   frequency?: number;
   startDate?: number; // EPOCH milliseconds
   endDate?: number; // EPOCH milliseconds
@@ -291,58 +67,45 @@ export interface PriceHistoryRequestParams {
   needPreviousClose?: boolean;
 }
 
-export interface PriceHistoryResponse {
-  symbol: string;
-  empty: boolean;
-  previousClose: number;
-  previousCloseDate: number;
-  candles: MarketDataCandle[];
-}
-
-// Movers Types
-export type MoversSymbolId = '$DJI' | '$COMPX' | '$SPX' | 'NYSE' | 'NASDAQ' | 'OTCBB' | 'INDEX_ALL' | 'EQUITY_ALL' | 'OPTION_ALL' | 'OPTION_PUT' | 'OPTION_CALL';
-export type MoversSort = 'VOLUME' | 'TRADES' | 'PERCENT_CHANGE_UP' | 'PERCENT_CHANGE_DOWN';
-export type MoversFrequency = 0 | 1 | 5 | 10 | 30 | 60;
-
 export interface MoversRequestParams {
-  symbolId: MoversSymbolId;
-  sort?: MoversSort;
-  frequency?: MoversFrequency;
+  symbolId: '$DJI' | '$COMPX' | '$SPX' | 'NYSE' | 'NASDAQ' | 'OTCBB' | 'INDEX_ALL' | 'EQUITY_ALL' | 'OPTION_ALL' | 'OPTION_PUT' | 'OPTION_CALL';
+  sort?: 'VOLUME' | 'TRADES' | 'PERCENT_CHANGE_UP' | 'PERCENT_CHANGE_DOWN';
+  frequency?: 0 | 1 | 5 | 10 | 30 | 60;
 }
-
-export interface Mover {
-  change: number;
-  description: string;
-  direction: 'up' | 'down';
-  last: number;
-  symbol: string;
-  totalVolume: number;
-}
-
-export interface MoversResponse {
-  screeners: Mover[];
-}
-
-// Market Hours Types
-export type MarketType = 'equity' | 'option' | 'bond' | 'future' | 'forex';
 
 export interface MarketHoursRequestParams {
-  markets: MarketType[];
+  markets: ('equity' | 'option' | 'bond' | 'future' | 'forex')[];
   date?: string; // YYYY-MM-DD format
 }
 
-export interface MarketHoursSession {
-  start: string;
-  end: string;
+export interface InstrumentsRequestParams {
+  symbol: string;
+  projection: 'symbol-search' | 'symbol-regex' | 'desc-search' | 'desc-regex' | 'search' | 'fundamental';
 }
 
-export interface MarketHoursSessions {
+// Type aliases for backward compatibility
+export type OptionChainResponse = OptionChain;
+export type OptionExpirationChainResponse = ExpirationChain;
+export type PriceHistoryResponse = CandleList;
+export type MarketDataCandle = Candle;
+export type MarketDataQuote = QuoteResponseObject;
+export type PeriodType = 'day' | 'month' | 'year' | 'ytd';
+export type FrequencyType = 'minute' | 'daily' | 'weekly' | 'monthly';
+export type MoversSymbolId = '$DJI' | '$COMPX' | '$SPX' | 'NYSE' | 'NASDAQ' | 'OTCBB' | 'INDEX_ALL' | 'EQUITY_ALL' | 'OPTION_ALL' | 'OPTION_PUT' | 'OPTION_CALL';
+export type MoversSort = 'VOLUME' | 'TRADES' | 'PERCENT_CHANGE_UP' | 'PERCENT_CHANGE_DOWN';
+export type MoversFrequency = 0 | 1 | 5 | 10 | 30 | 60;
+export type InstrumentProjection = 'symbol-search' | 'symbol-regex' | 'desc-search' | 'desc-regex' | 'search' | 'fundamental';
+export type MarketType = 'equity' | 'option' | 'bond' | 'future' | 'forex';
+export type MarketHoursSession = {
+  start: string;
+  end: string;
+};
+export type MarketHoursSessions = {
   preMarket?: MarketHoursSession[];
   regularMarket: MarketHoursSession[];
   postMarket?: MarketHoursSession[];
-}
-
-export interface MarketHoursProduct {
+};
+export type MarketHoursProduct = {
   date: string;
   marketType: string;
   exchange?: string;
@@ -351,33 +114,14 @@ export interface MarketHoursProduct {
   productName: string;
   isOpen: boolean;
   sessionHours: MarketHoursSessions;
-}
-
-export interface MarketHoursResponse {
-  [marketType: string]: {
-    [productCode: string]: MarketHoursProduct;
-  };
-}
-
-// Instruments Types
-export type InstrumentProjection = 'symbol-search' | 'symbol-regex' | 'desc-search' | 'desc-regex' | 'search' | 'fundamental';
-
-export interface InstrumentsRequestParams {
-  symbol: string;
-  projection: InstrumentProjection;
-}
-
-export interface Instrument {
-  cusip: string;
-  symbol: string;
-  description: string;
-  exchange: string;
-  assetType: string;
-}
-
-export interface InstrumentsResponse {
-  instruments: Instrument[];
-}
+};
+export type OptionExpiration = Expiration;
+export type OptionDeliverable = OptionDeliverables;
+export type { MoversResponse, InstrumentsResponse, Instrument, MarketHoursResponse } from '../types/schemas';
+export type { OptionContract } from '../types/schemas';
+export type { OptionChainExpDateMap } from '../types/schemas';
+export type Mover = Screener;
+export type { QuoteResponse } from '../types/schemas';
 
 export class MarketDataAPI {
   private oauth: SchwabOAuth;
@@ -386,8 +130,8 @@ export class MarketDataAPI {
   constructor(oauth: SchwabOAuth, environment: 'sandbox' | 'production' = 'production') {
     this.oauth = oauth;
     this.baseUrl = environment === 'sandbox' 
-      ? 'https://api.schwabapi.com/marketdata/v1/sandbox' 
-      : 'https://api.schwabapi.com/marketdata/v1';
+      ? 'https://api-sandbox.schwab.com/marketdata/v1'
+      : 'https://api.schwab.com/marketdata/v1';
   }
 
   private async makeRequest(url: string, options: {
@@ -395,16 +139,21 @@ export class MarketDataAPI {
     headers?: Record<string, string>;
     body?: string;
   } = {}): Promise<unknown> {
-    const authHeader = await this.oauth.getAuthorizationHeader();
+    const tokens = this.oauth.getTokens();
+    if (!tokens?.access_token) {
+      throw new Error('No valid access token available');
+    }
+
     const response = await fetch(url, {
       method: options.method || 'GET',
       headers: {
+        'Authorization': `Bearer ${tokens.access_token}`,
         'Content-Type': 'application/json',
-        'Authorization': authHeader,
         ...options.headers,
       },
       body: options.body,
     });
+
     if (!response.ok) {
       const errorText = await response.text();
       throw new Error(`HTTP ${response.status}: ${errorText}`);
@@ -413,10 +162,9 @@ export class MarketDataAPI {
   }
 
   /**
-   * Get quotes by list of symbols
+   * Get quotes for multiple symbols
    * GET /quotes
-   * 
-   * @param params - Query parameters for the quote request
+   * @param params - Query parameters for the quotes request
    * @returns Promise<QuoteResponse> - Object with symbol keys and quote data
    */
   public async getQuotes(params: QuoteRequestParams): Promise<QuoteResponse> {
@@ -445,9 +193,9 @@ export class MarketDataAPI {
    * 
    * @param symbolId - The symbol to get quote for
    * @param fields - Optional comma-separated list of fields to include
-   * @returns Promise<MarketDataQuote> - Quote data for the symbol
+   * @returns Promise<QuoteResponseObject> - Quote data for the symbol
    */
-  public async getQuoteBySymbol(symbolId: string, fields?: string): Promise<MarketDataQuote> {
+  public async getQuoteBySymbol(symbolId: string, fields?: string): Promise<QuoteResponseObject> {
     const queryParams = new URLSearchParams();
     
     if (fields) {
@@ -456,7 +204,7 @@ export class MarketDataAPI {
 
     const url = `${this.baseUrl}/${encodeURIComponent(symbolId)}/quotes?${queryParams.toString()}`;
     const response = await this.makeRequest(url);
-    return response as MarketDataQuote;
+    return response as QuoteResponseObject;
   }
 
   /**
@@ -485,9 +233,9 @@ export class MarketDataAPI {
    * Get option chains for a symbol
    * GET /chains
    * @param params - Query parameters for the option chain request
-   * @returns Promise<OptionChainResponse>
+   * @returns Promise<OptionChain>
    */
-  public async getOptionChains(params: OptionChainRequestParams): Promise<OptionChainResponse> {
+  public async getOptionChains(params: OptionChainRequestParams): Promise<OptionChain> {
     const queryParams = new URLSearchParams();
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
@@ -496,28 +244,28 @@ export class MarketDataAPI {
     });
     const url = `${this.baseUrl}/chains?${queryParams.toString()}`;
     const response = await this.makeRequest(url);
-    return response as OptionChainResponse;
+    return response as OptionChain;
   }
 
   /**
    * Get option expiration chain for a symbol
    * GET /expirationchain
    * @param symbol - The symbol to get expiration chain for
-   * @returns Promise<OptionExpirationChainResponse>
+   * @returns Promise<ExpirationChain>
    */
-  public async getOptionExpirationChain(symbol: string): Promise<OptionExpirationChainResponse> {
+  public async getOptionExpirationChain(symbol: string): Promise<ExpirationChain> {
     const url = `${this.baseUrl}/expirationchain?symbol=${encodeURIComponent(symbol)}`;
     const response = await this.makeRequest(url);
-    return response as OptionExpirationChainResponse;
+    return response as ExpirationChain;
   }
 
   /**
    * Get price history for a symbol
    * GET /pricehistory
    * @param params - Query parameters for the price history request
-   * @returns Promise<PriceHistoryResponse>
+   * @returns Promise<CandleList>
    */
-  public async getPriceHistory(params: PriceHistoryRequestParams): Promise<PriceHistoryResponse> {
+  public async getPriceHistory(params: PriceHistoryRequestParams): Promise<CandleList> {
     const queryParams = new URLSearchParams();
     
     // Required parameter
@@ -558,7 +306,7 @@ export class MarketDataAPI {
 
     const url = `${this.baseUrl}/pricehistory?${queryParams.toString()}`;
     const response = await this.makeRequest(url);
-    return response as PriceHistoryResponse;
+    return response as CandleList;
   }
 
   /**
@@ -567,7 +315,7 @@ export class MarketDataAPI {
    * @param periodType - The chart period type
    * @param period - The number of periods
    * @param options - Additional options
-   * @returns Promise<PriceHistoryResponse>
+   * @returns Promise<CandleList>
    */
   public async getPriceHistoryForSymbol(
     symbol: string,
@@ -581,7 +329,7 @@ export class MarketDataAPI {
       needExtendedHoursData?: boolean;
       needPreviousClose?: boolean;
     }
-  ): Promise<PriceHistoryResponse> {
+  ): Promise<CandleList> {
     return this.getPriceHistory({
       symbol,
       periodType,
@@ -627,7 +375,8 @@ export class MarketDataAPI {
   ): Promise<MoversResponse> {
     return this.getMovers({
       symbolId,
-      ...options,
+      sort: options?.sort,
+      frequency: options?.frequency,
     });
   }
 

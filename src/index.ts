@@ -71,4 +71,7 @@ export type {
   StreamerInfo,
   Offer,
   UserPreference,
-} from './api/userPreference'; 
+} from './api/userPreference';
+
+// Comprehensive API Schemas
+export * from './types/schemas'; 

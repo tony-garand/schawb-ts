@@ -16,6 +16,12 @@ describe('MarketDataAPI', () => {
     // Create mock OAuth instance
     mockOAuth = {
       getAuthorizationHeader: jest.fn().mockResolvedValue('Bearer mock-token'),
+      getTokens: jest.fn().mockReturnValue({
+        access_token: 'mock-token',
+        refresh_token: 'mock-refresh-token',
+        expires_in: 3600,
+        token_type: 'Bearer'
+      }),
     } as any;
 
     // Create MarketDataAPI instance
@@ -51,7 +57,7 @@ describe('MarketDataAPI', () => {
       await marketDataAPI.getQuotes(params);
 
       expect(global.fetch).toHaveBeenCalledWith(
-        'https://api.schwabapi.com/marketdata/v1/sandbox/quotes?symbols=AAPL%2CMSFT&fields=quote%2Creference&indicative=false',
+        'https://api-sandbox.schwab.com/marketdata/v1/quotes?symbols=AAPL%2CMSFT&fields=quote%2Creference&indicative=false',
         expect.objectContaining({
           method: 'GET',
           headers: expect.objectContaining({
@@ -74,7 +80,7 @@ describe('MarketDataAPI', () => {
       await marketDataAPI.getQuoteBySymbol('AAPL', 'quote,reference');
 
       expect(global.fetch).toHaveBeenCalledWith(
-        'https://api.schwabapi.com/marketdata/v1/sandbox/AAPL/quotes?fields=quote%2Creference',
+        'https://api-sandbox.schwab.com/marketdata/v1/AAPL/quotes?fields=quote%2Creference',
         expect.objectContaining({
           method: 'GET',
           headers: expect.objectContaining({
