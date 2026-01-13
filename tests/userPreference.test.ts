@@ -1,4 +1,4 @@
-import { UserPreferenceAPI, UserPreference, AccountPreference, StreamerInfo, Offer } from '../src/api/userPreference';
+import { UserPreferenceAPI, UserPreference } from '../src/api/userPreference';
 import { SchwabOAuth } from '../src/auth/oauth';
 
 jest.mock('../src/auth/oauth');
@@ -84,7 +84,7 @@ describe('UserPreferenceAPI', () => {
         expect.objectContaining({
           method: 'GET',
           headers: expect.objectContaining({
-            'Authorization': 'Bearer mock-token',
+            Authorization: 'Bearer mock-token',
             'Content-Type': 'application/json',
           }),
         })
@@ -98,9 +98,9 @@ describe('UserPreferenceAPI', () => {
         text: jest.fn().mockResolvedValue('Unauthorized'),
       });
 
-      await expect(userPreferenceAPI.getUserPreferences())
-        .rejects
-        .toThrow('HTTP 401: Unauthorized');
+      await expect(userPreferenceAPI.getUserPreferences()).rejects.toThrow(
+        'HTTP 401: Unauthorized'
+      );
     });
   });
 
@@ -164,12 +164,32 @@ describe('UserPreferenceAPI', () => {
     it('should flatten accounts from multiple preferences', async () => {
       const multiplePreferences: UserPreference[] = [
         {
-          accounts: [{ accountNumber: '111', primaryAccount: true, type: 'CASH', nickName: 'A1', accountColor: '#FFF', displayAcctId: '***111', autoPositionEffect: false }],
+          accounts: [
+            {
+              accountNumber: '111',
+              primaryAccount: true,
+              type: 'CASH',
+              nickName: 'A1',
+              accountColor: '#FFF',
+              displayAcctId: '***111',
+              autoPositionEffect: false,
+            },
+          ],
           streamerInfo: [],
           offers: [],
         },
         {
-          accounts: [{ accountNumber: '222', primaryAccount: false, type: 'MARGIN', nickName: 'A2', accountColor: '#000', displayAcctId: '***222', autoPositionEffect: false }],
+          accounts: [
+            {
+              accountNumber: '222',
+              primaryAccount: false,
+              type: 'MARGIN',
+              nickName: 'A2',
+              accountColor: '#000',
+              displayAcctId: '***222',
+              autoPositionEffect: false,
+            },
+          ],
           streamerInfo: [],
           offers: [],
         },
@@ -230,12 +250,28 @@ describe('UserPreferenceAPI', () => {
       const multiplePreferences: UserPreference[] = [
         {
           accounts: [],
-          streamerInfo: [{ streamerSocketUrl: 'url1', schwabClientCustomerId: 'c1', schwabClientCorrelId: 'r1', schwabClientChannel: 'ch1', schwabClientFunctionId: 'f1' }],
+          streamerInfo: [
+            {
+              streamerSocketUrl: 'url1',
+              schwabClientCustomerId: 'c1',
+              schwabClientCorrelId: 'r1',
+              schwabClientChannel: 'ch1',
+              schwabClientFunctionId: 'f1',
+            },
+          ],
           offers: [],
         },
         {
           accounts: [],
-          streamerInfo: [{ streamerSocketUrl: 'url2', schwabClientCustomerId: 'c2', schwabClientCorrelId: 'r2', schwabClientChannel: 'ch2', schwabClientFunctionId: 'f2' }],
+          streamerInfo: [
+            {
+              streamerSocketUrl: 'url2',
+              schwabClientCustomerId: 'c2',
+              schwabClientCorrelId: 'r2',
+              schwabClientChannel: 'ch2',
+              schwabClientFunctionId: 'f2',
+            },
+          ],
           offers: [],
         },
       ];
@@ -351,8 +387,24 @@ describe('UserPreferenceAPI', () => {
       const preferencesWithoutNicknames: UserPreference[] = [
         {
           accounts: [
-            { accountNumber: '111', primaryAccount: true, type: 'CASH', nickName: 'Named', accountColor: '', displayAcctId: '', autoPositionEffect: false },
-            { accountNumber: '222', primaryAccount: false, type: 'MARGIN', nickName: '', accountColor: '', displayAcctId: '', autoPositionEffect: false },
+            {
+              accountNumber: '111',
+              primaryAccount: true,
+              type: 'CASH',
+              nickName: 'Named',
+              accountColor: '',
+              displayAcctId: '',
+              autoPositionEffect: false,
+            },
+            {
+              accountNumber: '222',
+              primaryAccount: false,
+              type: 'MARGIN',
+              nickName: '',
+              accountColor: '',
+              displayAcctId: '',
+              autoPositionEffect: false,
+            },
           ],
           streamerInfo: [],
           offers: [],
@@ -389,8 +441,24 @@ describe('UserPreferenceAPI', () => {
       const preferencesWithoutColors: UserPreference[] = [
         {
           accounts: [
-            { accountNumber: '111', primaryAccount: true, type: 'CASH', nickName: '', accountColor: '#FFF', displayAcctId: '', autoPositionEffect: false },
-            { accountNumber: '222', primaryAccount: false, type: 'MARGIN', nickName: '', accountColor: '', displayAcctId: '', autoPositionEffect: false },
+            {
+              accountNumber: '111',
+              primaryAccount: true,
+              type: 'CASH',
+              nickName: '',
+              accountColor: '#FFF',
+              displayAcctId: '',
+              autoPositionEffect: false,
+            },
+            {
+              accountNumber: '222',
+              primaryAccount: false,
+              type: 'MARGIN',
+              nickName: '',
+              accountColor: '',
+              displayAcctId: '',
+              autoPositionEffect: false,
+            },
           ],
           streamerInfo: [],
           offers: [],
@@ -561,20 +629,16 @@ describe('UserPreferenceAPI', () => {
         expect.any(String),
         expect.objectContaining({
           headers: expect.objectContaining({
-            'Authorization': customToken,
+            Authorization: customToken,
           }),
         })
       );
     });
 
     it('should handle OAuth token errors', async () => {
-      mockOAuth.getAuthorizationHeader.mockRejectedValue(
-        new Error('No tokens available')
-      );
+      mockOAuth.getAuthorizationHeader.mockRejectedValue(new Error('No tokens available'));
 
-      await expect(userPreferenceAPI.getUserPreferences())
-        .rejects
-        .toThrow('No tokens available');
+      await expect(userPreferenceAPI.getUserPreferences()).rejects.toThrow('No tokens available');
     });
   });
 });

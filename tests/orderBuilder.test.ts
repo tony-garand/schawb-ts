@@ -1,5 +1,5 @@
 import { OrderBuilder, OrderLegBuilder, OrderTemplates } from '../src/builders/orderBuilder';
-import { Order, OrderLegCollection } from '../src/types';
+import { OrderLegCollection } from '../src/types';
 
 describe('OrderBuilder', () => {
   let builder: OrderBuilder;
@@ -29,7 +29,7 @@ describe('OrderBuilder', () => {
         .setOrderType('LIMIT')
         .setSession('NORMAL')
         .setDuration('DAY')
-        .setPrice(100.50)
+        .setPrice(100.5)
         .setQuantity(10);
 
       expect(result).toBe(builder);
@@ -49,10 +49,14 @@ describe('OrderBuilder', () => {
 
     it('should support different order types', () => {
       const types: Array<'MARKET' | 'LIMIT' | 'STOP' | 'STOP_LIMIT' | 'TRAILING_STOP'> = [
-        'MARKET', 'LIMIT', 'STOP', 'STOP_LIMIT', 'TRAILING_STOP'
+        'MARKET',
+        'LIMIT',
+        'STOP',
+        'STOP_LIMIT',
+        'TRAILING_STOP',
       ];
 
-      types.forEach(type => {
+      types.forEach((type) => {
         const order = builder
           .reset()
           .setOrderType(type)
@@ -103,11 +107,11 @@ describe('OrderBuilder', () => {
     it('should set stop price', () => {
       const order = builder
         .setOrderType('STOP')
-        .setStopPrice(95.50)
+        .setStopPrice(95.5)
         .addOrderLeg(new OrderLegBuilder().setInstrument('TEST', 'EQUITY').setQuantity(1).build())
         .build();
 
-      expect(order.stopPrice).toBe(95.50);
+      expect(order.stopPrice).toBe(95.5);
     });
   });
 
@@ -118,12 +122,10 @@ describe('OrderBuilder', () => {
           .setInstruction('BUY')
           .setQuantity(10)
           .setInstrument('AAPL', 'EQUITY')
-          .build()
+          .build(),
       ];
 
-      const order = builder
-        .setOrderLegCollection(legs)
-        .build();
+      const order = builder.setOrderLegCollection(legs).build();
 
       expect(order.orderLegCollection).toEqual(legs);
     });
@@ -137,9 +139,7 @@ describe('OrderBuilder', () => {
         .setInstrument('AAPL', 'EQUITY')
         .build();
 
-      const order = builder
-        .addOrderLeg(leg)
-        .build();
+      const order = builder.addOrderLeg(leg).build();
 
       expect(order.orderLegCollection).toHaveLength(1);
       expect(order.orderLegCollection[0]).toEqual(leg);
@@ -158,10 +158,7 @@ describe('OrderBuilder', () => {
         .setInstrument('AAPL  240315C00155000', 'OPTION')
         .build();
 
-      const order = builder
-        .addOrderLeg(leg1)
-        .addOrderLeg(leg2)
-        .build();
+      const order = builder.addOrderLeg(leg1).addOrderLeg(leg2).build();
 
       expect(order.orderLegCollection).toHaveLength(2);
       expect(order.orderLegCollection[0]).toEqual(leg1);
@@ -297,23 +294,16 @@ describe('OrderLegBuilder', () => {
 
   describe('setInstruction', () => {
     it('should set instruction', () => {
-      const leg = legBuilder
-        .setInstruction('SELL')
-        .setInstrument('AAPL', 'EQUITY')
-        .build();
+      const leg = legBuilder.setInstruction('SELL').setInstrument('AAPL', 'EQUITY').build();
 
       expect(leg.instruction).toBe('SELL');
     });
 
     it('should support option instructions', () => {
-      const instructions: Array<'BUY_TO_OPEN' | 'BUY_TO_CLOSE' | 'SELL_TO_OPEN' | 'SELL_TO_CLOSE'> = [
-        'BUY_TO_OPEN',
-        'BUY_TO_CLOSE',
-        'SELL_TO_OPEN',
-        'SELL_TO_CLOSE'
-      ];
+      const instructions: Array<'BUY_TO_OPEN' | 'BUY_TO_CLOSE' | 'SELL_TO_OPEN' | 'SELL_TO_CLOSE'> =
+        ['BUY_TO_OPEN', 'BUY_TO_CLOSE', 'SELL_TO_OPEN', 'SELL_TO_CLOSE'];
 
-      instructions.forEach(instruction => {
+      instructions.forEach((instruction) => {
         const leg = legBuilder
           .reset()
           .setInstruction(instruction)
@@ -327,10 +317,7 @@ describe('OrderLegBuilder', () => {
 
   describe('setQuantity', () => {
     it('should set quantity', () => {
-      const leg = legBuilder
-        .setQuantity(100)
-        .setInstrument('AAPL', 'EQUITY')
-        .build();
+      const leg = legBuilder.setQuantity(100).setInstrument('AAPL', 'EQUITY').build();
 
       expect(leg.quantity).toBe(100);
     });
@@ -338,9 +325,7 @@ describe('OrderLegBuilder', () => {
 
   describe('setInstrument', () => {
     it('should set equity instrument', () => {
-      const leg = legBuilder
-        .setInstrument('AAPL', 'EQUITY')
-        .build();
+      const leg = legBuilder.setInstrument('AAPL', 'EQUITY').build();
 
       expect(leg.instrument.symbol).toBe('AAPL');
       expect(leg.instrument.assetType).toBe('EQUITY');
@@ -349,9 +334,7 @@ describe('OrderLegBuilder', () => {
 
     it('should set option instrument', () => {
       const optionSymbol = 'AAPL  240315C00150000';
-      const leg = legBuilder
-        .setInstrument(optionSymbol, 'OPTION')
-        .build();
+      const leg = legBuilder.setInstrument(optionSymbol, 'OPTION').build();
 
       expect(leg.instrument.symbol).toBe(optionSymbol);
       expect(leg.instrument.assetType).toBe('OPTION');
@@ -359,9 +342,7 @@ describe('OrderLegBuilder', () => {
     });
 
     it('should default to EQUITY asset type', () => {
-      const leg = legBuilder
-        .setInstrument('MSFT')
-        .build();
+      const leg = legBuilder.setInstrument('MSFT').build();
 
       expect(leg.instrument.assetType).toBe('EQUITY');
     });
@@ -369,10 +350,7 @@ describe('OrderLegBuilder', () => {
 
   describe('setLegId', () => {
     it('should set leg ID', () => {
-      const leg = legBuilder
-        .setLegId(1)
-        .setInstrument('TEST', 'EQUITY')
-        .build();
+      const leg = legBuilder.setLegId(1).setInstrument('TEST', 'EQUITY').build();
 
       expect(leg.legId).toBe(1);
     });
@@ -455,10 +433,10 @@ describe('OrderTemplates', () => {
 
   describe('buyLimitStock', () => {
     it('should create limit buy order for stock', () => {
-      const order = OrderTemplates.buyLimitStock('MSFT', 20, 250.50, accountNumber);
+      const order = OrderTemplates.buyLimitStock('MSFT', 20, 250.5, accountNumber);
 
       expect(order.orderType).toBe('LIMIT');
-      expect(order.price).toBe(250.50);
+      expect(order.price).toBe(250.5);
       expect(order.session).toBe('NORMAL');
       expect(order.duration).toBe('DAY');
       expect(order.orderLegCollection[0].instruction).toBe('BUY');
@@ -468,52 +446,52 @@ describe('OrderTemplates', () => {
 
   describe('sellLimitStock', () => {
     it('should create limit sell order for stock', () => {
-      const order = OrderTemplates.sellLimitStock('GOOGL', 5, 2800.00, accountNumber);
+      const order = OrderTemplates.sellLimitStock('GOOGL', 5, 2800.0, accountNumber);
 
       expect(order.orderType).toBe('LIMIT');
-      expect(order.price).toBe(2800.00);
+      expect(order.price).toBe(2800.0);
       expect(order.orderLegCollection[0].instruction).toBe('SELL');
     });
   });
 
   describe('buyStopStock', () => {
     it('should create stop buy order for stock', () => {
-      const order = OrderTemplates.buyStopStock('NVDA', 10, 500.00, accountNumber);
+      const order = OrderTemplates.buyStopStock('NVDA', 10, 500.0, accountNumber);
 
       expect(order.orderType).toBe('STOP');
-      expect(order.stopPrice).toBe(500.00);
+      expect(order.stopPrice).toBe(500.0);
       expect(order.orderLegCollection[0].instruction).toBe('BUY');
     });
   });
 
   describe('sellStopStock', () => {
     it('should create stop sell order for stock', () => {
-      const order = OrderTemplates.sellStopStock('AMD', 25, 95.00, accountNumber);
+      const order = OrderTemplates.sellStopStock('AMD', 25, 95.0, accountNumber);
 
       expect(order.orderType).toBe('STOP');
-      expect(order.stopPrice).toBe(95.00);
+      expect(order.stopPrice).toBe(95.0);
       expect(order.orderLegCollection[0].instruction).toBe('SELL');
     });
   });
 
   describe('buyStopLimitStock', () => {
     it('should create stop-limit buy order for stock', () => {
-      const order = OrderTemplates.buyStopLimitStock('META', 15, 350.00, 348.00, accountNumber);
+      const order = OrderTemplates.buyStopLimitStock('META', 15, 350.0, 348.0, accountNumber);
 
       expect(order.orderType).toBe('STOP_LIMIT');
-      expect(order.stopPrice).toBe(350.00);
-      expect(order.price).toBe(348.00);
+      expect(order.stopPrice).toBe(350.0);
+      expect(order.price).toBe(348.0);
       expect(order.orderLegCollection[0].instruction).toBe('BUY');
     });
   });
 
   describe('sellStopLimitStock', () => {
     it('should create stop-limit sell order for stock', () => {
-      const order = OrderTemplates.sellStopLimitStock('NFLX', 10, 400.00, 398.00, accountNumber);
+      const order = OrderTemplates.sellStopLimitStock('NFLX', 10, 400.0, 398.0, accountNumber);
 
       expect(order.orderType).toBe('STOP_LIMIT');
-      expect(order.stopPrice).toBe(400.00);
-      expect(order.price).toBe(398.00);
+      expect(order.stopPrice).toBe(400.0);
+      expect(order.price).toBe(398.0);
       expect(order.orderLegCollection[0].instruction).toBe('SELL');
     });
   });
@@ -544,7 +522,12 @@ describe('OrderTemplates', () => {
     });
 
     it('should support custom instruction', () => {
-      const order = OrderTemplates.buyOption('AAPL  240315C00150000', 5, accountNumber, 'BUY_TO_CLOSE');
+      const order = OrderTemplates.buyOption(
+        'AAPL  240315C00150000',
+        5,
+        accountNumber,
+        'BUY_TO_CLOSE'
+      );
 
       expect(order.orderLegCollection[0].instruction).toBe('BUY_TO_CLOSE');
     });
@@ -560,7 +543,12 @@ describe('OrderTemplates', () => {
     });
 
     it('should support custom instruction', () => {
-      const order = OrderTemplates.sellOption('TSLA  240315P00200000', 3, accountNumber, 'SELL_TO_CLOSE');
+      const order = OrderTemplates.sellOption(
+        'TSLA  240315P00200000',
+        3,
+        accountNumber,
+        'SELL_TO_CLOSE'
+      );
 
       expect(order.orderLegCollection[0].instruction).toBe('SELL_TO_CLOSE');
     });
@@ -570,10 +558,10 @@ describe('OrderTemplates', () => {
     it('should create vertical spread order', () => {
       const longOption = 'XYZ   240315P00045000';
       const shortOption = 'XYZ   240315P00043000';
-      const order = OrderTemplates.buyVerticalSpread(longOption, shortOption, 2, 0.10);
+      const order = OrderTemplates.buyVerticalSpread(longOption, shortOption, 2, 0.1);
 
       expect(order.orderType).toBe('NET_DEBIT');
-      expect(order.price).toBe(0.10);
+      expect(order.price).toBe(0.1);
       expect(order.quantity).toBe(2);
       expect(order.orderLegCollection).toHaveLength(2);
 
@@ -605,7 +593,7 @@ describe('OrderTemplates', () => {
 
   describe('oneCancelsAnother', () => {
     it('should create OCO order with limit and stop-limit legs', () => {
-      const order = OrderTemplates.oneCancelsAnother('XYZ', 2, 45.97, 37.03, 37.00);
+      const order = OrderTemplates.oneCancelsAnother('XYZ', 2, 45.97, 37.03, 37.0);
 
       expect(order.orderStrategyType).toBe('OCO');
       expect(order.duration).toBe('DAY');
@@ -621,7 +609,7 @@ describe('OrderTemplates', () => {
       const stopLimitOrder = order.childOrderStrategies![1];
       expect(stopLimitOrder.orderType).toBe('STOP_LIMIT');
       expect(stopLimitOrder.stopPrice).toBe(37.03);
-      expect(stopLimitOrder.price).toBe(37.00);
+      expect(stopLimitOrder.price).toBe(37.0);
       expect(stopLimitOrder.orderLegCollection[0].instruction).toBe('SELL');
     });
   });
@@ -655,7 +643,7 @@ describe('OrderTemplates', () => {
     });
 
     it('should format strike price with decimals', () => {
-      const symbol = OrderTemplates.createOptionSymbol('AAPL', '240315', 'C', 150.50);
+      const symbol = OrderTemplates.createOptionSymbol('AAPL', '240315', 'C', 150.5);
 
       expect(symbol).toBe('AAPL  240315C00150500');
     });

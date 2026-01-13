@@ -14,6 +14,7 @@ export {
   readTokenFile,
   writeTokenFile,
   getTokenAge,
+  TOKEN_EXPIRY,
 } from './auth/easyAuth';
 export type { EasyClientOptions, LoginFlowOptions, TokenFileData } from './auth/easyAuth';
 
