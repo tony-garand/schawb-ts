@@ -1,6 +1,6 @@
 # Schwab Trading API Client
 
-A comprehensive TypeScript/Node.js client for the Schwab Trading API with full OAuth 2.0 support and order management capabilities. Built with Node.js built-in modules only - no external HTTP dependencies.
+A comprehensive TypeScript/Node.js client for the Schwab Trading API with full OAuth 2.0 support and order management capabilities. Built with minimal dependencies and leveraging Node.js built-in modules for HTTP operations.
 
 ## Features
 
@@ -12,7 +12,7 @@ A comprehensive TypeScript/Node.js client for the Schwab Trading API with full O
 - 📋 **Pre-built Templates** - Common order types ready to use
 - 🔄 **Token Management** - Automatic token refresh and persistence
 - 🛡️ **Type Safety** - Full TypeScript support with comprehensive types
-- 🚀 **Zero Dependencies** - Uses only Node.js built-in modules
+- 📦 **Minimal Dependencies** - Built with Node.js core modules and minimal external packages
 
 ## Installation
 
@@ -853,13 +853,20 @@ npx ts-node examples/transactions-example.ts
 
 ## Dependencies
 
-This library uses only Node.js built-in modules:
+This library uses Node.js built-in modules for core functionality with minimal external dependencies:
+
+### Runtime Dependencies
+- `ws` - WebSocket client for real-time streaming data
+- `node-cron` - Task scheduling for automated operations
+- `open` - Cross-platform command to open URLs (used for OAuth flow)
+
+### Built-in Modules
 - `fetch` - For HTTP requests (Node.js 18+)
 - `http` - For creating HTTP servers
 - `url` - For URL parsing
 - `Buffer` - For base64 encoding
 
-No external HTTP libraries like axios or express are required.
+No external HTTP libraries like axios or express are required for API operations.
 
 ## License
 
