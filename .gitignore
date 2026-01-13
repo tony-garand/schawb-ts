@@ -1,9 +1,9 @@
 # Dependencies
 node_modules/
-
+README.rst
 # Build output
 dist/
-
+docs/
 # IDE files
 .idea/
 .vscode/
