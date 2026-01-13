@@ -431,4 +431,230 @@ describe('TransactionsAPI', () => {
         .toThrow('No tokens available');
     });
   });
+
+  describe('helper methods', () => {
+    describe('formatDateTime', () => {
+      it('should format Date object to ISO-8601 string', () => {
+        const date = new Date('2024-01-15T10:30:00.000Z');
+        const result = TransactionsAPI.formatDateTime(date);
+
+        expect(result).toBe('2024-01-15T10:30:00.000Z');
+      });
+
+      it('should format date string to ISO-8601 string', () => {
+        const dateStr = '2024-01-15T10:30:00.000Z';
+        const result = TransactionsAPI.formatDateTime(dateStr);
+
+        expect(result).toBe('2024-01-15T10:30:00.000Z');
+      });
+    });
+
+    describe('createDateRange', () => {
+      it('should create date range from Date objects', () => {
+        const startDate = new Date('2024-01-01T00:00:00.000Z');
+        const endDate = new Date('2024-01-31T23:59:59.999Z');
+
+        const result = TransactionsAPI.createDateRange(startDate, endDate);
+
+        expect(result).toEqual({
+          startDate: '2024-01-01T00:00:00.000Z',
+          endDate: '2024-01-31T23:59:59.999Z',
+        });
+      });
+
+      it('should create date range from date strings', () => {
+        const result = TransactionsAPI.createDateRange(
+          '2024-01-01T00:00:00.000Z',
+          '2024-01-31T23:59:59.999Z'
+        );
+
+        expect(result).toEqual({
+          startDate: '2024-01-01T00:00:00.000Z',
+          endDate: '2024-01-31T23:59:59.999Z',
+        });
+      });
+    });
+
+    describe('getRecentTransactions', () => {
+      const accountNumber = 'encrypted-account-123';
+
+      beforeEach(() => {
+        jest.useFakeTimers();
+        jest.setSystemTime(new Date('2024-01-15T12:00:00.000Z'));
+      });
+
+      afterEach(() => {
+        jest.useRealTimers();
+      });
+
+      it('should get transactions for last N days', async () => {
+        global.fetch = jest.fn().mockResolvedValue({
+          ok: true,
+          json: jest.fn().mockResolvedValue([]),
+        });
+
+        await transactionsAPI.getRecentTransactions(accountNumber, 7);
+
+        const fetchCall = (global.fetch as jest.Mock).mock.calls[0];
+        const url = fetchCall[0];
+
+        expect(url).toContain('startDate=2024-01-08');
+        expect(url).toContain('endDate=2024-01-15');
+      });
+
+      it('should get recent transactions with symbol filter', async () => {
+        global.fetch = jest.fn().mockResolvedValue({
+          ok: true,
+          json: jest.fn().mockResolvedValue([]),
+        });
+
+        await transactionsAPI.getRecentTransactions(accountNumber, 30, 'AAPL');
+
+        const fetchCall = (global.fetch as jest.Mock).mock.calls[0];
+        const url = fetchCall[0];
+
+        expect(url).toContain('symbol=AAPL');
+      });
+
+      it('should get recent transactions with type filter', async () => {
+        global.fetch = jest.fn().mockResolvedValue({
+          ok: true,
+          json: jest.fn().mockResolvedValue([]),
+        });
+
+        await transactionsAPI.getRecentTransactions(accountNumber, 30, undefined, 'TRADE');
+
+        const fetchCall = (global.fetch as jest.Mock).mock.calls[0];
+        const url = fetchCall[0];
+
+        expect(url).toContain('types=TRADE');
+      });
+    });
+
+    describe('getTransactionsForMonth', () => {
+      const accountNumber = 'encrypted-account-123';
+
+      it('should get transactions for a specific month', async () => {
+        global.fetch = jest.fn().mockResolvedValue({
+          ok: true,
+          json: jest.fn().mockResolvedValue([]),
+        });
+
+        await transactionsAPI.getTransactionsForMonth(accountNumber, 2024, 1);
+
+        const fetchCall = (global.fetch as jest.Mock).mock.calls[0];
+        const url = fetchCall[0];
+
+        expect(url).toContain('startDate=2024-01-01');
+        expect(url).toContain('endDate=2024-01-31');
+      });
+
+      it('should get transactions for February (29 days in leap year)', async () => {
+        global.fetch = jest.fn().mockResolvedValue({
+          ok: true,
+          json: jest.fn().mockResolvedValue([]),
+        });
+
+        await transactionsAPI.getTransactionsForMonth(accountNumber, 2024, 2);
+
+        const fetchCall = (global.fetch as jest.Mock).mock.calls[0];
+        const url = fetchCall[0];
+
+        expect(url).toContain('startDate=2024-02-01');
+        expect(url).toContain('endDate=2024-02-29'); // 2024 is a leap year
+      });
+
+      it('should get transactions for month with symbol filter', async () => {
+        global.fetch = jest.fn().mockResolvedValue({
+          ok: true,
+          json: jest.fn().mockResolvedValue([]),
+        });
+
+        await transactionsAPI.getTransactionsForMonth(accountNumber, 2024, 3, 'TSLA');
+
+        const fetchCall = (global.fetch as jest.Mock).mock.calls[0];
+        const url = fetchCall[0];
+
+        expect(url).toContain('symbol=TSLA');
+      });
+    });
+
+    describe('getTradeTransactions', () => {
+      const accountNumber = 'encrypted-account-123';
+
+      it('should get trade transactions only', async () => {
+        const startDate = new Date('2024-01-01T00:00:00.000Z');
+        const endDate = new Date('2024-01-31T23:59:59.999Z');
+
+        global.fetch = jest.fn().mockResolvedValue({
+          ok: true,
+          json: jest.fn().mockResolvedValue([]),
+        });
+
+        await transactionsAPI.getTradeTransactions(accountNumber, startDate, endDate);
+
+        const fetchCall = (global.fetch as jest.Mock).mock.calls[0];
+        const url = fetchCall[0];
+
+        expect(url).toContain('types=TRADE');
+      });
+
+      it('should get trade transactions with symbol filter', async () => {
+        const startDate = '2024-01-01T00:00:00.000Z';
+        const endDate = '2024-01-31T23:59:59.999Z';
+
+        global.fetch = jest.fn().mockResolvedValue({
+          ok: true,
+          json: jest.fn().mockResolvedValue([]),
+        });
+
+        await transactionsAPI.getTradeTransactions(accountNumber, startDate, endDate, 'NVDA');
+
+        const fetchCall = (global.fetch as jest.Mock).mock.calls[0];
+        const url = fetchCall[0];
+
+        expect(url).toContain('types=TRADE');
+        expect(url).toContain('symbol=NVDA');
+      });
+    });
+
+    describe('getDividendTransactions', () => {
+      const accountNumber = 'encrypted-account-123';
+
+      it('should get dividend transactions only', async () => {
+        const startDate = new Date('2024-01-01T00:00:00.000Z');
+        const endDate = new Date('2024-01-31T23:59:59.999Z');
+
+        global.fetch = jest.fn().mockResolvedValue({
+          ok: true,
+          json: jest.fn().mockResolvedValue([]),
+        });
+
+        await transactionsAPI.getDividendTransactions(accountNumber, startDate, endDate);
+
+        const fetchCall = (global.fetch as jest.Mock).mock.calls[0];
+        const url = fetchCall[0];
+
+        expect(url).toContain('types=DIVIDEND_OR_INTEREST');
+      });
+
+      it('should get dividend transactions with symbol filter', async () => {
+        const startDate = '2024-01-01T00:00:00.000Z';
+        const endDate = '2024-12-31T23:59:59.999Z';
+
+        global.fetch = jest.fn().mockResolvedValue({
+          ok: true,
+          json: jest.fn().mockResolvedValue([]),
+        });
+
+        await transactionsAPI.getDividendTransactions(accountNumber, startDate, endDate, 'KO');
+
+        const fetchCall = (global.fetch as jest.Mock).mock.calls[0];
+        const url = fetchCall[0];
+
+        expect(url).toContain('types=DIVIDEND_OR_INTEREST');
+        expect(url).toContain('symbol=KO');
+      });
+    });
+  });
 });

@@ -59,6 +59,7 @@ describe('SchwabOAuth', () => {
       refresh_token: 'test-refresh-token',
       expires_in: 3600,
       token_type: 'Bearer',
+      scope: 'api',
     };
 
     beforeEach(() => {
@@ -177,6 +178,7 @@ describe('SchwabOAuth', () => {
       refresh_token: 'new-refresh-token',
       expires_in: 3600,
       token_type: 'Bearer',
+      scope: 'api',
     };
 
     beforeEach(() => {
@@ -195,6 +197,7 @@ describe('SchwabOAuth', () => {
         refresh_token: 'old-refresh-token',
         expires_in: 3600,
         token_type: 'Bearer',
+        scope: 'api',
       };
       oauth.setTokens(initialTokens);
 
@@ -234,6 +237,7 @@ describe('SchwabOAuth', () => {
         refresh_token: 'old-refresh-token',
         expires_in: 3600,
         token_type: 'Bearer',
+        scope: 'api',
       };
       oauth.setTokens(initialTokens);
 
@@ -260,6 +264,7 @@ describe('SchwabOAuth', () => {
         refresh_token: 'old-refresh',
         expires_in: 3600,
         token_type: 'Bearer',
+        scope: 'api',
       });
 
       global.fetch = jest.fn().mockResolvedValue({
@@ -290,6 +295,7 @@ describe('SchwabOAuth', () => {
         refresh_token: 'valid-refresh-token',
         expires_in: 3600,
         token_type: 'Bearer',
+        scope: 'api',
       };
       oauth.setTokens(tokens);
 
@@ -310,6 +316,7 @@ describe('SchwabOAuth', () => {
         refresh_token: 'refresh-token',
         expires_in: 3600,
         token_type: 'Bearer',
+        scope: 'api',
       };
 
       // Set tokens that will expire soon
@@ -321,6 +328,7 @@ describe('SchwabOAuth', () => {
         refresh_token: 'new-refresh-token',
         expires_in: 3600,
         token_type: 'Bearer',
+        scope: 'api',
       };
 
       global.fetch = jest.fn().mockResolvedValue({
@@ -340,6 +348,7 @@ describe('SchwabOAuth', () => {
         refresh_token: 'refresh-token',
         expires_in: 3600,
         token_type: 'Bearer',
+        scope: 'api',
       };
 
       // Set tokens that expire in 4 minutes (less than 5 minute threshold)
@@ -351,6 +360,7 @@ describe('SchwabOAuth', () => {
         refresh_token: 'new-refresh-token',
         expires_in: 3600,
         token_type: 'Bearer',
+        scope: 'api',
       };
 
       global.fetch = jest.fn().mockResolvedValue({
@@ -369,6 +379,7 @@ describe('SchwabOAuth', () => {
         refresh_token: 'refresh-token',
         expires_in: 3600,
         token_type: 'Bearer',
+        scope: 'api',
       };
 
       // Set tokens that expire in 10 minutes
@@ -404,6 +415,7 @@ describe('SchwabOAuth', () => {
         refresh_token: 'refresh-token',
         expires_in: 3600,
         token_type: 'Bearer',
+        scope: 'api',
       };
       oauth.setTokens(tokens);
 
@@ -416,6 +428,7 @@ describe('SchwabOAuth', () => {
         refresh_token: 'refresh-token',
         expires_in: 3600,
         token_type: 'Bearer',
+        scope: 'api',
       };
 
       const pastExpiryTime = Date.now() - 1000; // Expired 1 second ago
@@ -436,6 +449,7 @@ describe('SchwabOAuth', () => {
         refresh_token: 'test-refresh',
         expires_in: 3600,
         token_type: 'Bearer',
+        scope: 'api',
       };
       oauth.setTokens(tokens);
 
@@ -459,6 +473,7 @@ describe('SchwabOAuth', () => {
         refresh_token: 'test-refresh',
         expires_in: 3600,
         token_type: 'Bearer',
+        scope: 'api',
       };
 
       oauth.setTokens(tokens);
@@ -473,6 +488,7 @@ describe('SchwabOAuth', () => {
         refresh_token: 'test-refresh',
         expires_in: 3600,
         token_type: 'Bearer',
+        scope: 'api',
       };
 
       const customExpiryTime = Date.now() + 7200000; // 2 hours
@@ -493,6 +509,7 @@ describe('SchwabOAuth', () => {
         refresh_token: 'test-refresh',
         expires_in: 3600,
         token_type: 'Bearer',
+        scope: 'api',
       };
       oauth.setTokens(tokens);
 
@@ -512,6 +529,7 @@ describe('SchwabOAuth', () => {
         refresh_token: 'test-refresh-token',
         expires_in: 3600,
         token_type: 'Bearer',
+        scope: 'api',
       };
       oauth.setTokens(tokens);
 
@@ -535,6 +553,7 @@ describe('SchwabOAuth', () => {
         refresh_token: 'refresh-token',
         expires_in: 3600,
         token_type: 'Bearer',
+        scope: 'api',
       };
 
       // Token expires in 2 minutes (less than 5 minute threshold)
@@ -546,6 +565,7 @@ describe('SchwabOAuth', () => {
         refresh_token: 'new-refresh',
         expires_in: 3600,
         token_type: 'Bearer',
+        scope: 'api',
       };
 
       global.fetch = jest.fn().mockResolvedValue({

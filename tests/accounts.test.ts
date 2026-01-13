@@ -87,6 +87,7 @@ describe('AccountsAPI', () => {
             isDayTrader: false,
             isClosingOnlyRestricted: false,
             pfcbFlag: false,
+            positions: [],
             currentBalances: {
               cashBalance: 10000,
               availableFunds: 10000,
@@ -99,7 +100,7 @@ describe('AccountsAPI', () => {
               cashBalance: 10000,
               availableFunds: 10000,
             },
-          } as SecuritiesAccount
+          } as unknown as SecuritiesAccount
         }
       ];
 
@@ -154,6 +155,7 @@ describe('AccountsAPI', () => {
         isDayTrader: false,
         isClosingOnlyRestricted: false,
         pfcbFlag: false,
+        positions: [],
         currentBalances: {
           cashBalance: 50000,
           availableFunds: 48000,
@@ -167,7 +169,7 @@ describe('AccountsAPI', () => {
           cashBalance: 50000,
           availableFunds: 48000,
         },
-      };
+      } as unknown as SecuritiesAccount;
 
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
@@ -227,6 +229,7 @@ describe('AccountsAPI', () => {
           isDayTrader: false,
           isClosingOnlyRestricted: false,
           pfcbFlag: false,
+          positions: [],
           currentBalances: {
             cashBalance: 25000,
             availableFunds: 25000,
@@ -239,7 +242,7 @@ describe('AccountsAPI', () => {
             cashBalance: 25000,
             availableFunds: 25000,
           },
-        } as SecuritiesAccount
+        } as unknown as SecuritiesAccount
       };
 
       global.fetch = jest.fn().mockResolvedValue({
@@ -269,6 +272,7 @@ describe('AccountsAPI', () => {
           longQuantity: 100,
           settledLongQuantity: 100,
           settledShortQuantity: 0,
+          agedQuantity: 100,
           instrument: {
             assetType: 'EQUITY',
             cusip: '037833100',
@@ -278,6 +282,16 @@ describe('AccountsAPI', () => {
             netChange: 1.25,
           },
           marketValue: 15150.00,
+          maintenanceRequirement: 7575.00,
+          averageLongPrice: 150.25,
+          averageShortPrice: 0,
+          taxLotAverageLongPrice: 150.25,
+          taxLotAverageShortPrice: 0,
+          longOpenProfitLoss: 125.50,
+          shortOpenProfitLoss: 0,
+          previousSessionLongQuantity: 100,
+          previousSessionShortQuantity: 0,
+          currentDayCost: 15024.50,
         }
       ];
 
