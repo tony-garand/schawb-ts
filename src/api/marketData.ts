@@ -3,29 +3,29 @@ import {
   // Quote types
   QuoteResponse,
   QuoteResponseObject,
-  
+
   // Option types
   OptionChain,
   ExpirationChain,
-  
+
   // Instrument types
   InstrumentsResponse,
   Instrument,
-  
+
   // Market hours types
   MarketHoursResponse,
-  
+
   // Movers types
   MoversResponse,
-  
+
   // Price history types
   CandleList,
   Candle,
-  
+
   // New types
   OptionDeliverables,
   Expiration,
-  Screener
+  Screener,
 } from '../types/schemas';
 
 // Request parameter types (not in schemas)
@@ -40,7 +40,19 @@ export interface OptionChainRequestParams {
   contractType?: 'CALL' | 'PUT' | 'ALL';
   strikeCount?: number;
   includeUnderlyingQuote?: boolean;
-  strategy?: 'SINGLE' | 'ANALYTICAL' | 'COVERED' | 'VERTICAL' | 'CALENDAR' | 'STRANGLE' | 'STRADDLE' | 'BUTTERFLY' | 'CONDOR' | 'DIAGONAL' | 'COLLAR' | 'ROLL';
+  strategy?:
+    | 'SINGLE'
+    | 'ANALYTICAL'
+    | 'COVERED'
+    | 'VERTICAL'
+    | 'CALENDAR'
+    | 'STRANGLE'
+    | 'STRADDLE'
+    | 'BUTTERFLY'
+    | 'CONDOR'
+    | 'DIAGONAL'
+    | 'COLLAR'
+    | 'ROLL';
   interval?: number;
   strike?: number;
   range?: string;
@@ -50,9 +62,22 @@ export interface OptionChainRequestParams {
   underlyingPrice?: number;
   interestRate?: number;
   daysToExpiration?: number;
-  expMonth?: 'JAN'|'FEB'|'MAR'|'APR'|'MAY'|'JUN'|'JUL'|'AUG'|'SEP'|'OCT'|'NOV'|'DEC'|'ALL';
+  expMonth?:
+    | 'JAN'
+    | 'FEB'
+    | 'MAR'
+    | 'APR'
+    | 'MAY'
+    | 'JUN'
+    | 'JUL'
+    | 'AUG'
+    | 'SEP'
+    | 'OCT'
+    | 'NOV'
+    | 'DEC'
+    | 'ALL';
   optionType?: string;
-  entitlement?: 'PN'|'NP'|'PP';
+  entitlement?: 'PN' | 'NP' | 'PP';
 }
 
 export interface PriceHistoryRequestParams {
@@ -68,7 +93,18 @@ export interface PriceHistoryRequestParams {
 }
 
 export interface MoversRequestParams {
-  symbolId: '$DJI' | '$COMPX' | '$SPX' | 'NYSE' | 'NASDAQ' | 'OTCBB' | 'INDEX_ALL' | 'EQUITY_ALL' | 'OPTION_ALL' | 'OPTION_PUT' | 'OPTION_CALL';
+  symbolId:
+    | '$DJI'
+    | '$COMPX'
+    | '$SPX'
+    | 'NYSE'
+    | 'NASDAQ'
+    | 'OTCBB'
+    | 'INDEX_ALL'
+    | 'EQUITY_ALL'
+    | 'OPTION_ALL'
+    | 'OPTION_PUT'
+    | 'OPTION_CALL';
   sort?: 'VOLUME' | 'TRADES' | 'PERCENT_CHANGE_UP' | 'PERCENT_CHANGE_DOWN';
   frequency?: 0 | 1 | 5 | 10 | 30 | 60;
 }
@@ -80,7 +116,13 @@ export interface MarketHoursRequestParams {
 
 export interface InstrumentsRequestParams {
   symbol: string;
-  projection: 'symbol-search' | 'symbol-regex' | 'desc-search' | 'desc-regex' | 'search' | 'fundamental';
+  projection:
+    | 'symbol-search'
+    | 'symbol-regex'
+    | 'desc-search'
+    | 'desc-regex'
+    | 'search'
+    | 'fundamental';
 }
 
 // Type aliases for backward compatibility
@@ -91,10 +133,27 @@ export type MarketDataCandle = Candle;
 export type MarketDataQuote = QuoteResponseObject;
 export type PeriodType = 'day' | 'month' | 'year' | 'ytd';
 export type FrequencyType = 'minute' | 'daily' | 'weekly' | 'monthly';
-export type MoversSymbolId = '$DJI' | '$COMPX' | '$SPX' | 'NYSE' | 'NASDAQ' | 'OTCBB' | 'INDEX_ALL' | 'EQUITY_ALL' | 'OPTION_ALL' | 'OPTION_PUT' | 'OPTION_CALL';
+export type MoversSymbolId =
+  | '$DJI'
+  | '$COMPX'
+  | '$SPX'
+  | 'NYSE'
+  | 'NASDAQ'
+  | 'OTCBB'
+  | 'INDEX_ALL'
+  | 'EQUITY_ALL'
+  | 'OPTION_ALL'
+  | 'OPTION_PUT'
+  | 'OPTION_CALL';
 export type MoversSort = 'VOLUME' | 'TRADES' | 'PERCENT_CHANGE_UP' | 'PERCENT_CHANGE_DOWN';
 export type MoversFrequency = 0 | 1 | 5 | 10 | 30 | 60;
-export type InstrumentProjection = 'symbol-search' | 'symbol-regex' | 'desc-search' | 'desc-regex' | 'search' | 'fundamental';
+export type InstrumentProjection =
+  | 'symbol-search'
+  | 'symbol-regex'
+  | 'desc-search'
+  | 'desc-regex'
+  | 'search'
+  | 'fundamental';
 export type MarketType = 'equity' | 'option' | 'bond' | 'future' | 'forex';
 export type MarketHoursSession = {
   start: string;
@@ -117,7 +176,12 @@ export type MarketHoursProduct = {
 };
 export type OptionExpiration = Expiration;
 export type OptionDeliverable = OptionDeliverables;
-export type { MoversResponse, InstrumentsResponse, Instrument, MarketHoursResponse } from '../types/schemas';
+export type {
+  MoversResponse,
+  InstrumentsResponse,
+  Instrument,
+  MarketHoursResponse,
+} from '../types/schemas';
 export type { OptionContract } from '../types/schemas';
 export type { OptionChainExpDateMap } from '../types/schemas';
 export type Mover = Screener;
@@ -129,16 +193,20 @@ export class MarketDataAPI {
 
   constructor(oauth: SchwabOAuth, environment: 'sandbox' | 'production' = 'production') {
     this.oauth = oauth;
-    this.baseUrl = environment === 'sandbox' 
-      ? 'https://api-sandbox.schwab.com/marketdata/v1'
-      : 'https://api.schwab.com/marketdata/v1';
+    this.baseUrl =
+      environment === 'sandbox'
+        ? 'https://api-sandbox.schwab.com/marketdata/v1'
+        : 'https://api.schwab.com/marketdata/v1';
   }
 
-  private async makeRequest(url: string, options: {
-    method?: string;
-    headers?: Record<string, string>;
-    body?: string;
-  } = {}): Promise<unknown> {
+  private async makeRequest(
+    url: string,
+    options: {
+      method?: string;
+      headers?: Record<string, string>;
+      body?: string;
+    } = {}
+  ): Promise<unknown> {
     const tokens = this.oauth.getTokens();
     if (!tokens?.access_token) {
       throw new Error('No valid access token available');
@@ -147,7 +215,7 @@ export class MarketDataAPI {
     const response = await fetch(url, {
       method: options.method || 'GET',
       headers: {
-        'Authorization': `Bearer ${tokens.access_token}`,
+        Authorization: `Bearer ${tokens.access_token}`,
         'Content-Type': 'application/json',
         ...options.headers,
       },
@@ -169,15 +237,15 @@ export class MarketDataAPI {
    */
   public async getQuotes(params: QuoteRequestParams): Promise<QuoteResponse> {
     const queryParams = new URLSearchParams();
-    
+
     if (params.symbols) {
       queryParams.append('symbols', params.symbols);
     }
-    
+
     if (params.fields) {
       queryParams.append('fields', params.fields);
     }
-    
+
     if (params.indicative !== undefined) {
       queryParams.append('indicative', params.indicative.toString());
     }
@@ -190,14 +258,14 @@ export class MarketDataAPI {
   /**
    * Get quote by single symbol
    * GET /{symbol_id}/quotes
-   * 
+   *
    * @param symbolId - The symbol to get quote for
    * @param fields - Optional comma-separated list of fields to include
    * @returns Promise<QuoteResponseObject> - Quote data for the symbol
    */
   public async getQuoteBySymbol(symbolId: string, fields?: string): Promise<QuoteResponseObject> {
     const queryParams = new URLSearchParams();
-    
+
     if (fields) {
       queryParams.append('fields', fields);
     }
@@ -209,13 +277,13 @@ export class MarketDataAPI {
 
   /**
    * Get quotes for multiple symbols with convenience method
-   * 
+   *
    * @param symbols - Array of symbols to get quotes for
    * @param options - Optional parameters for the request
    * @returns Promise<QuoteResponse> - Object with symbol keys and quote data
    */
   public async getQuotesForSymbols(
-    symbols: string[], 
+    symbols: string[],
     options?: {
       fields?: string;
       indicative?: boolean;
@@ -267,39 +335,39 @@ export class MarketDataAPI {
    */
   public async getPriceHistory(params: PriceHistoryRequestParams): Promise<CandleList> {
     const queryParams = new URLSearchParams();
-    
+
     // Required parameter
     queryParams.append('symbol', params.symbol);
-    
+
     // Optional parameters
     if (params.periodType) {
       queryParams.append('periodType', params.periodType);
     }
-    
+
     if (params.period !== undefined) {
       queryParams.append('period', params.period.toString());
     }
-    
+
     if (params.frequencyType) {
       queryParams.append('frequencyType', params.frequencyType);
     }
-    
+
     if (params.frequency !== undefined) {
       queryParams.append('frequency', params.frequency.toString());
     }
-    
+
     if (params.startDate !== undefined) {
       queryParams.append('startDate', params.startDate.toString());
     }
-    
+
     if (params.endDate !== undefined) {
       queryParams.append('endDate', params.endDate.toString());
     }
-    
+
     if (params.needExtendedHoursData !== undefined) {
       queryParams.append('needExtendedHoursData', params.needExtendedHoursData.toString());
     }
-    
+
     if (params.needPreviousClose !== undefined) {
       queryParams.append('needPreviousClose', params.needPreviousClose.toString());
     }
@@ -346,11 +414,11 @@ export class MarketDataAPI {
    */
   public async getMovers(params: MoversRequestParams): Promise<MoversResponse> {
     const queryParams = new URLSearchParams();
-    
+
     if (params.sort) {
       queryParams.append('sort', params.sort);
     }
-    
+
     if (params.frequency !== undefined) {
       queryParams.append('frequency', params.frequency.toString());
     }
@@ -388,10 +456,10 @@ export class MarketDataAPI {
    */
   public async getMarketHours(params: MarketHoursRequestParams): Promise<MarketHoursResponse> {
     const queryParams = new URLSearchParams();
-    
+
     // Required parameter - join markets array with comma
     queryParams.append('markets', params.markets.join(','));
-    
+
     if (params.date) {
       queryParams.append('date', params.date);
     }
@@ -408,9 +476,12 @@ export class MarketDataAPI {
    * @param date - Optional date in YYYY-MM-DD format
    * @returns Promise<MarketHoursResponse>
    */
-  public async getMarketHoursForMarket(marketId: MarketType, date?: string): Promise<MarketHoursResponse> {
+  public async getMarketHoursForMarket(
+    marketId: MarketType,
+    date?: string
+  ): Promise<MarketHoursResponse> {
     const queryParams = new URLSearchParams();
-    
+
     if (date) {
       queryParams.append('date', date);
     }
@@ -441,7 +512,7 @@ export class MarketDataAPI {
    */
   public async getInstruments(params: InstrumentsRequestParams): Promise<InstrumentsResponse> {
     const queryParams = new URLSearchParams();
-    
+
     // Required parameters
     queryParams.append('symbol', params.symbol);
     queryParams.append('projection', params.projection);
@@ -484,4 +555,274 @@ export class MarketDataAPI {
   public async getFundamentalInstruments(symbol: string): Promise<InstrumentsResponse> {
     return this.getInstruments({ symbol, projection: 'fundamental' });
   }
-} 
+
+  // ==================== Price History Convenience Methods ====================
+
+  /**
+   * Get price history with minute-by-minute data
+   *
+   * Returns data for up to 48 days (35 days if extended hours data is included)
+   *
+   * @param symbol - The symbol to get price history for
+   * @param startDate - Optional start date (epoch milliseconds or Date)
+   * @param endDate - Optional end date (epoch milliseconds or Date)
+   * @param needExtendedHoursData - Include extended hours data (default: true)
+   * @returns Promise<CandleList>
+   */
+  public async getPriceHistoryEveryMinute(
+    symbol: string,
+    startDate?: number | Date,
+    endDate?: number | Date,
+    needExtendedHoursData: boolean = true
+  ): Promise<CandleList> {
+    const params: PriceHistoryRequestParams = {
+      symbol,
+      periodType: 'day',
+      frequencyType: 'minute',
+      frequency: 1,
+      needExtendedHoursData,
+    };
+
+    if (startDate) {
+      params.startDate = typeof startDate === 'number' ? startDate : startDate.getTime();
+    }
+    if (endDate) {
+      params.endDate = typeof endDate === 'number' ? endDate : endDate.getTime();
+    }
+
+    // Default to 10 days if no date range specified
+    if (!startDate && !endDate) {
+      params.period = 10;
+    }
+
+    return this.getPriceHistory(params);
+  }
+
+  /**
+   * Get price history with 5-minute bars
+   *
+   * Returns data for up to 48 days (35 days if extended hours data is included)
+   *
+   * @param symbol - The symbol to get price history for
+   * @param startDate - Optional start date (epoch milliseconds or Date)
+   * @param endDate - Optional end date (epoch milliseconds or Date)
+   * @param needExtendedHoursData - Include extended hours data (default: true)
+   * @returns Promise<CandleList>
+   */
+  public async getPriceHistoryEveryFiveMinutes(
+    symbol: string,
+    startDate?: number | Date,
+    endDate?: number | Date,
+    needExtendedHoursData: boolean = true
+  ): Promise<CandleList> {
+    const params: PriceHistoryRequestParams = {
+      symbol,
+      periodType: 'day',
+      frequencyType: 'minute',
+      frequency: 5,
+      needExtendedHoursData,
+    };
+
+    if (startDate) {
+      params.startDate = typeof startDate === 'number' ? startDate : startDate.getTime();
+    }
+    if (endDate) {
+      params.endDate = typeof endDate === 'number' ? endDate : endDate.getTime();
+    }
+
+    if (!startDate && !endDate) {
+      params.period = 10;
+    }
+
+    return this.getPriceHistory(params);
+  }
+
+  /**
+   * Get price history with 10-minute bars
+   *
+   * @param symbol - The symbol to get price history for
+   * @param startDate - Optional start date (epoch milliseconds or Date)
+   * @param endDate - Optional end date (epoch milliseconds or Date)
+   * @param needExtendedHoursData - Include extended hours data (default: true)
+   * @returns Promise<CandleList>
+   */
+  public async getPriceHistoryEveryTenMinutes(
+    symbol: string,
+    startDate?: number | Date,
+    endDate?: number | Date,
+    needExtendedHoursData: boolean = true
+  ): Promise<CandleList> {
+    const params: PriceHistoryRequestParams = {
+      symbol,
+      periodType: 'day',
+      frequencyType: 'minute',
+      frequency: 10,
+      needExtendedHoursData,
+    };
+
+    if (startDate) {
+      params.startDate = typeof startDate === 'number' ? startDate : startDate.getTime();
+    }
+    if (endDate) {
+      params.endDate = typeof endDate === 'number' ? endDate : endDate.getTime();
+    }
+
+    if (!startDate && !endDate) {
+      params.period = 10;
+    }
+
+    return this.getPriceHistory(params);
+  }
+
+  /**
+   * Get price history with 15-minute bars
+   *
+   * @param symbol - The symbol to get price history for
+   * @param startDate - Optional start date (epoch milliseconds or Date)
+   * @param endDate - Optional end date (epoch milliseconds or Date)
+   * @param needExtendedHoursData - Include extended hours data (default: true)
+   * @returns Promise<CandleList>
+   */
+  public async getPriceHistoryEveryFifteenMinutes(
+    symbol: string,
+    startDate?: number | Date,
+    endDate?: number | Date,
+    needExtendedHoursData: boolean = true
+  ): Promise<CandleList> {
+    const params: PriceHistoryRequestParams = {
+      symbol,
+      periodType: 'day',
+      frequencyType: 'minute',
+      frequency: 15,
+      needExtendedHoursData,
+    };
+
+    if (startDate) {
+      params.startDate = typeof startDate === 'number' ? startDate : startDate.getTime();
+    }
+    if (endDate) {
+      params.endDate = typeof endDate === 'number' ? endDate : endDate.getTime();
+    }
+
+    if (!startDate && !endDate) {
+      params.period = 10;
+    }
+
+    return this.getPriceHistory(params);
+  }
+
+  /**
+   * Get price history with 30-minute bars
+   *
+   * @param symbol - The symbol to get price history for
+   * @param startDate - Optional start date (epoch milliseconds or Date)
+   * @param endDate - Optional end date (epoch milliseconds or Date)
+   * @param needExtendedHoursData - Include extended hours data (default: true)
+   * @returns Promise<CandleList>
+   */
+  public async getPriceHistoryEveryThirtyMinutes(
+    symbol: string,
+    startDate?: number | Date,
+    endDate?: number | Date,
+    needExtendedHoursData: boolean = true
+  ): Promise<CandleList> {
+    const params: PriceHistoryRequestParams = {
+      symbol,
+      periodType: 'day',
+      frequencyType: 'minute',
+      frequency: 30,
+      needExtendedHoursData,
+    };
+
+    if (startDate) {
+      params.startDate = typeof startDate === 'number' ? startDate : startDate.getTime();
+    }
+    if (endDate) {
+      params.endDate = typeof endDate === 'number' ? endDate : endDate.getTime();
+    }
+
+    if (!startDate && !endDate) {
+      params.period = 10;
+    }
+
+    return this.getPriceHistory(params);
+  }
+
+  /**
+   * Get price history with daily bars
+   *
+   * Returns up to 20 years of daily data
+   *
+   * @param symbol - The symbol to get price history for
+   * @param startDate - Optional start date (epoch milliseconds or Date)
+   * @param endDate - Optional end date (epoch milliseconds or Date)
+   * @param needExtendedHoursData - Include extended hours data (default: true)
+   * @returns Promise<CandleList>
+   */
+  public async getPriceHistoryEveryDay(
+    symbol: string,
+    startDate?: number | Date,
+    endDate?: number | Date,
+    needExtendedHoursData: boolean = true
+  ): Promise<CandleList> {
+    const params: PriceHistoryRequestParams = {
+      symbol,
+      periodType: 'year',
+      frequencyType: 'daily',
+      frequency: 1,
+      needExtendedHoursData,
+    };
+
+    if (startDate) {
+      params.startDate = typeof startDate === 'number' ? startDate : startDate.getTime();
+    }
+    if (endDate) {
+      params.endDate = typeof endDate === 'number' ? endDate : endDate.getTime();
+    }
+
+    if (!startDate && !endDate) {
+      params.period = 20; // 20 years of daily data
+    }
+
+    return this.getPriceHistory(params);
+  }
+
+  /**
+   * Get price history with weekly bars
+   *
+   * Returns up to 20 years of weekly data
+   *
+   * @param symbol - The symbol to get price history for
+   * @param startDate - Optional start date (epoch milliseconds or Date)
+   * @param endDate - Optional end date (epoch milliseconds or Date)
+   * @param needExtendedHoursData - Include extended hours data (default: true)
+   * @returns Promise<CandleList>
+   */
+  public async getPriceHistoryEveryWeek(
+    symbol: string,
+    startDate?: number | Date,
+    endDate?: number | Date,
+    needExtendedHoursData: boolean = true
+  ): Promise<CandleList> {
+    const params: PriceHistoryRequestParams = {
+      symbol,
+      periodType: 'year',
+      frequencyType: 'weekly',
+      frequency: 1,
+      needExtendedHoursData,
+    };
+
+    if (startDate) {
+      params.startDate = typeof startDate === 'number' ? startDate : startDate.getTime();
+    }
+    if (endDate) {
+      params.endDate = typeof endDate === 'number' ? endDate : endDate.getTime();
+    }
+
+    if (!startDate && !endDate) {
+      params.period = 20; // 20 years of weekly data
+    }
+
+    return this.getPriceHistory(params);
+  }
+}

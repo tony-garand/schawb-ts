@@ -11,6 +11,7 @@ export interface OAuthTokens {
   token_type: string;
   expires_in: number;
   scope: string;
+  id_token?: string;
 }
 
 // Client Configuration
@@ -31,21 +32,100 @@ export interface AccountNumberHash {
 export type Session = 'NORMAL' | 'AM' | 'PM' | 'SEAMLESS';
 
 // Duration Enum
-export type Duration = 'DAY' | 'GOOD_TILL_CANCEL' | 'FILL_OR_KILL' | 'IMMEDIATE_OR_CANCEL' | 'END_OF_WEEK' | 'END_OF_MONTH' | 'NEXT_END_OF_MONTH' | 'UNKNOWN';
+export type Duration =
+  | 'DAY'
+  | 'GOOD_TILL_CANCEL'
+  | 'FILL_OR_KILL'
+  | 'IMMEDIATE_OR_CANCEL'
+  | 'END_OF_WEEK'
+  | 'END_OF_MONTH'
+  | 'NEXT_END_OF_MONTH'
+  | 'UNKNOWN';
 
 // Order Type Enums
-export type OrderType = 'MARKET' | 'LIMIT' | 'STOP' | 'STOP_LIMIT' | 'TRAILING_STOP' | 'CABINET' | 'NON_MARKETABLE' | 'MARKET_ON_CLOSE' | 'EXERCISE' | 'TRAILING_STOP_LIMIT' | 'NET_DEBIT' | 'NET_CREDIT' | 'NET_ZERO' | 'LIMIT_ON_CLOSE' | 'UNKNOWN';
+export type OrderType =
+  | 'MARKET'
+  | 'LIMIT'
+  | 'STOP'
+  | 'STOP_LIMIT'
+  | 'TRAILING_STOP'
+  | 'CABINET'
+  | 'NON_MARKETABLE'
+  | 'MARKET_ON_CLOSE'
+  | 'EXERCISE'
+  | 'TRAILING_STOP_LIMIT'
+  | 'NET_DEBIT'
+  | 'NET_CREDIT'
+  | 'NET_ZERO'
+  | 'LIMIT_ON_CLOSE'
+  | 'UNKNOWN';
 
-export type OrderTypeRequest = 'MARKET' | 'LIMIT' | 'STOP' | 'STOP_LIMIT' | 'TRAILING_STOP' | 'CABINET' | 'NON_MARKETABLE' | 'MARKET_ON_CLOSE' | 'EXERCISE' | 'TRAILING_STOP_LIMIT' | 'NET_DEBIT' | 'NET_CREDIT' | 'NET_ZERO' | 'LIMIT_ON_CLOSE';
+export type OrderTypeRequest =
+  | 'MARKET'
+  | 'LIMIT'
+  | 'STOP'
+  | 'STOP_LIMIT'
+  | 'TRAILING_STOP'
+  | 'CABINET'
+  | 'NON_MARKETABLE'
+  | 'MARKET_ON_CLOSE'
+  | 'EXERCISE'
+  | 'TRAILING_STOP_LIMIT'
+  | 'NET_DEBIT'
+  | 'NET_CREDIT'
+  | 'NET_ZERO'
+  | 'LIMIT_ON_CLOSE';
 
 // Complex Order Strategy Type Enum
-export type ComplexOrderStrategyType = 'NONE' | 'COVERED' | 'VERTICAL' | 'BACK_RATIO' | 'CALENDAR' | 'DIAGONAL' | 'STRADDLE' | 'STRANGLE' | 'COLLAR_SYNTHETIC' | 'BUTTERFLY' | 'CONDOR' | 'IRON_CONDOR' | 'VERTICAL_ROLL' | 'COLLAR_WITH_STOCK' | 'DOUBLE_DIAGONAL' | 'UNBALANCED_BUTTERFLY' | 'UNBALANCED_CONDOR' | 'UNBALANCED_IRON_CONDOR' | 'UNBALANCED_VERTICAL_ROLL' | 'MUTUAL_FUND_SWAP' | 'CUSTOM';
+export type ComplexOrderStrategyType =
+  | 'NONE'
+  | 'COVERED'
+  | 'VERTICAL'
+  | 'BACK_RATIO'
+  | 'CALENDAR'
+  | 'DIAGONAL'
+  | 'STRADDLE'
+  | 'STRANGLE'
+  | 'COLLAR_SYNTHETIC'
+  | 'BUTTERFLY'
+  | 'CONDOR'
+  | 'IRON_CONDOR'
+  | 'VERTICAL_ROLL'
+  | 'COLLAR_WITH_STOCK'
+  | 'DOUBLE_DIAGONAL'
+  | 'UNBALANCED_BUTTERFLY'
+  | 'UNBALANCED_CONDOR'
+  | 'UNBALANCED_IRON_CONDOR'
+  | 'UNBALANCED_VERTICAL_ROLL'
+  | 'MUTUAL_FUND_SWAP'
+  | 'CUSTOM';
 
 // Requested Destination Enum
-export type RequestedDestination = 'INET' | 'ECN_ARCA' | 'CBOE' | 'AMEX' | 'PHLX' | 'ISE' | 'BOX' | 'NYSE' | 'NASDAQ' | 'BATS' | 'C2' | 'AUTO';
+export type RequestedDestination =
+  | 'INET'
+  | 'ECN_ARCA'
+  | 'CBOE'
+  | 'AMEX'
+  | 'PHLX'
+  | 'ISE'
+  | 'BOX'
+  | 'NYSE'
+  | 'NASDAQ'
+  | 'BATS'
+  | 'C2'
+  | 'AUTO';
 
 // Stop Price Link Basis Enum
-export type StopPriceLinkBasis = 'MANUAL' | 'BASE' | 'TRIGGER' | 'LAST' | 'BID' | 'ASK' | 'ASK_BID' | 'MARK' | 'AVERAGE';
+export type StopPriceLinkBasis =
+  | 'MANUAL'
+  | 'BASE'
+  | 'TRIGGER'
+  | 'LAST'
+  | 'BID'
+  | 'ASK'
+  | 'ASK_BID'
+  | 'MARK'
+  | 'AVERAGE';
 
 // Stop Price Link Type Enum
 export type StopPriceLinkType = 'VALUE' | 'PERCENT' | 'TICK';
@@ -54,22 +134,68 @@ export type StopPriceLinkType = 'VALUE' | 'PERCENT' | 'TICK';
 export type StopType = 'STANDARD' | 'BID' | 'ASK' | 'LAST' | 'MARK';
 
 // Price Link Basis Enum
-export type PriceLinkBasis = 'MANUAL' | 'BASE' | 'TRIGGER' | 'LAST' | 'BID' | 'ASK' | 'ASK_BID' | 'MARK' | 'AVERAGE';
+export type PriceLinkBasis =
+  | 'MANUAL'
+  | 'BASE'
+  | 'TRIGGER'
+  | 'LAST'
+  | 'BID'
+  | 'ASK'
+  | 'ASK_BID'
+  | 'MARK'
+  | 'AVERAGE';
 
 // Price Link Type Enum
 export type PriceLinkType = 'VALUE' | 'PERCENT' | 'TICK';
 
 // Tax Lot Method Enum
-export type TaxLotMethod = 'FIFO' | 'LIFO' | 'HIGH_COST' | 'LOW_COST' | 'AVERAGE_COST' | 'SPECIFIC_LOT' | 'LOSS_HARVESTER';
+export type TaxLotMethod =
+  | 'FIFO'
+  | 'LIFO'
+  | 'HIGH_COST'
+  | 'LOW_COST'
+  | 'AVERAGE_COST'
+  | 'SPECIFIC_LOT'
+  | 'LOSS_HARVESTER';
 
 // Special Instruction Enum
 export type SpecialInstruction = 'ALL_OR_NONE' | 'DO_NOT_REDUCE' | 'ALL_OR_NONE_DO_NOT_REDUCE';
 
 // Order Strategy Type Enum
-export type OrderStrategyType = 'SINGLE' | 'CANCEL' | 'RECALL' | 'PAIR' | 'FLATTEN' | 'TWO_DAY_SWAP' | 'BLAST_ALL' | 'OCO' | 'TRIGGER';
+export type OrderStrategyType =
+  | 'SINGLE'
+  | 'CANCEL'
+  | 'RECALL'
+  | 'PAIR'
+  | 'FLATTEN'
+  | 'TWO_DAY_SWAP'
+  | 'BLAST_ALL'
+  | 'OCO'
+  | 'TRIGGER';
 
 // Status Enum
-export type Status = 'AWAITING_PARENT_ORDER' | 'AWAITING_CONDITION' | 'AWAITING_STOP_CONDITION' | 'AWAITING_MANUAL_REVIEW' | 'ACCEPTED' | 'AWAITING_UR_OUT' | 'PENDING_ACTIVATION' | 'QUEUED' | 'WORKING' | 'REJECTED' | 'PENDING_CANCEL' | 'CANCELED' | 'PENDING_REPLACE' | 'REPLACED' | 'FILLED' | 'EXPIRED' | 'NEW' | 'AWAITING_RELEASE_TIME' | 'PENDING_ACKNOWLEDGEMENT' | 'PENDING_RECALL' | 'UNKNOWN';
+export type Status =
+  | 'AWAITING_PARENT_ORDER'
+  | 'AWAITING_CONDITION'
+  | 'AWAITING_STOP_CONDITION'
+  | 'AWAITING_MANUAL_REVIEW'
+  | 'ACCEPTED'
+  | 'AWAITING_UR_OUT'
+  | 'PENDING_ACTIVATION'
+  | 'QUEUED'
+  | 'WORKING'
+  | 'REJECTED'
+  | 'PENDING_CANCEL'
+  | 'CANCELED'
+  | 'PENDING_REPLACE'
+  | 'REPLACED'
+  | 'FILLED'
+  | 'EXPIRED'
+  | 'NEW'
+  | 'AWAITING_RELEASE_TIME'
+  | 'PENDING_ACKNOWLEDGEMENT'
+  | 'PENDING_RECALL'
+  | 'UNKNOWN';
 
 // Amount Indicator Enum
 export type AmountIndicator = 'DOLLARS' | 'SHARES' | 'ALL_SHARES' | 'PERCENTAGE' | 'UNKNOWN';
@@ -78,25 +204,100 @@ export type AmountIndicator = 'DOLLARS' | 'SHARES' | 'ALL_SHARES' | 'PERCENTAGE'
 export type SettlementInstruction = 'REGULAR' | 'CASH' | 'NEXT_DAY' | 'UNKNOWN';
 
 // Asset Type Enum
-export type AssetType = 'EQUITY' | 'MUTUAL_FUND' | 'OPTION' | 'FUTURE' | 'FOREX' | 'INDEX' | 'CASH_EQUIVALENT' | 'FIXED_INCOME' | 'PRODUCT' | 'CURRENCY' | 'COLLECTIVE_INVESTMENT';
+export type AssetType =
+  | 'EQUITY'
+  | 'MUTUAL_FUND'
+  | 'OPTION'
+  | 'FUTURE'
+  | 'FOREX'
+  | 'INDEX'
+  | 'CASH_EQUIVALENT'
+  | 'FIXED_INCOME'
+  | 'PRODUCT'
+  | 'CURRENCY'
+  | 'COLLECTIVE_INVESTMENT';
 
 // Instruction Enum
-export type Instruction = 'BUY' | 'SELL' | 'BUY_TO_COVER' | 'SELL_SHORT' | 'BUY_TO_OPEN' | 'BUY_TO_CLOSE' | 'SELL_TO_OPEN' | 'SELL_TO_CLOSE' | 'EXCHANGE' | 'SELL_SHORT_EXEMPT';
+export type Instruction =
+  | 'BUY'
+  | 'SELL'
+  | 'BUY_TO_COVER'
+  | 'SELL_SHORT'
+  | 'BUY_TO_OPEN'
+  | 'BUY_TO_CLOSE'
+  | 'SELL_TO_OPEN'
+  | 'SELL_TO_CLOSE'
+  | 'EXCHANGE'
+  | 'SELL_SHORT_EXEMPT';
 
 // Advanced Order Type Enum
-export type AdvancedOrderType = 'NONE' | 'OTO' | 'OCO' | 'OTOCO' | 'OT2OCO' | 'OT3OCO' | 'BLAST_ALL' | 'OTA' | 'PAIR';
+export type AdvancedOrderType =
+  | 'NONE'
+  | 'OTO'
+  | 'OCO'
+  | 'OTOCO'
+  | 'OT2OCO'
+  | 'OT3OCO'
+  | 'BLAST_ALL'
+  | 'OTA'
+  | 'PAIR';
 
 // API Rule Action Enum
 export type APIRuleAction = 'ACCEPT' | 'ALERT' | 'REJECT' | 'REVIEW' | 'UNKNOWN';
 
 // Fee Type Enum
-export type FeeType = 'COMMISSION' | 'SEC_FEE' | 'STR_FEE' | 'R_FEE' | 'CDSC_FEE' | 'OPT_REG_FEE' | 'ADDITIONAL_FEE' | 'MISCELLANEOUS_FEE' | 'FTT' | 'FUTURES_CLEARING_FEE' | 'FUTURES_DESK_OFFICE_FEE' | 'FUTURES_EXCHANGE_FEE' | 'FUTURES_GLOBEX_FEE' | 'FUTURES_NFA_FEE' | 'FUTURES_PIT_BROKERAGE_FEE' | 'FUTURES_TRANSACTION_FEE' | 'LOW_PROCEEDS_COMMISSION' | 'BASE_CHARGE' | 'GENERAL_CHARGE' | 'GST_FEE' | 'TAF_FEE' | 'INDEX_OPTION_FEE' | 'TEFRA_TAX' | 'STATE_TAX' | 'UNKNOWN';
+export type FeeType =
+  | 'COMMISSION'
+  | 'SEC_FEE'
+  | 'STR_FEE'
+  | 'R_FEE'
+  | 'CDSC_FEE'
+  | 'OPT_REG_FEE'
+  | 'ADDITIONAL_FEE'
+  | 'MISCELLANEOUS_FEE'
+  | 'FTT'
+  | 'FUTURES_CLEARING_FEE'
+  | 'FUTURES_DESK_OFFICE_FEE'
+  | 'FUTURES_EXCHANGE_FEE'
+  | 'FUTURES_GLOBEX_FEE'
+  | 'FUTURES_NFA_FEE'
+  | 'FUTURES_PIT_BROKERAGE_FEE'
+  | 'FUTURES_TRANSACTION_FEE'
+  | 'LOW_PROCEEDS_COMMISSION'
+  | 'BASE_CHARGE'
+  | 'GENERAL_CHARGE'
+  | 'GST_FEE'
+  | 'TAF_FEE'
+  | 'INDEX_OPTION_FEE'
+  | 'TEFRA_TAX'
+  | 'STATE_TAX'
+  | 'UNKNOWN';
 
 // Activity Type Enum
-export type ActivityType = 'ACTIVITY_CORRECTION' | 'EXECUTION' | 'ORDER_ACTION' | 'TRANSFER' | 'UNKNOWN';
+export type ActivityType =
+  | 'ACTIVITY_CORRECTION'
+  | 'EXECUTION'
+  | 'ORDER_ACTION'
+  | 'TRANSFER'
+  | 'UNKNOWN';
 
 // Transaction Type Enum
-export type TransactionType = 'TRADE' | 'RECEIVE_AND_DELIVER' | 'DIVIDEND_OR_INTEREST' | 'ACH_RECEIPT' | 'ACH_DISBURSEMENT' | 'CASH_RECEIPT' | 'CASH_DISBURSEMENT' | 'ELECTRONIC_FUND' | 'WIRE_OUT' | 'WIRE_IN' | 'JOURNAL' | 'MEMORANDUM' | 'MARGIN_CALL' | 'MONEY_MARKET' | 'SMA_ADJUSTMENT';
+export type TransactionType =
+  | 'TRADE'
+  | 'RECEIVE_AND_DELIVER'
+  | 'DIVIDEND_OR_INTEREST'
+  | 'ACH_RECEIPT'
+  | 'ACH_DISBURSEMENT'
+  | 'CASH_RECEIPT'
+  | 'CASH_DISBURSEMENT'
+  | 'ELECTRONIC_FUND'
+  | 'WIRE_OUT'
+  | 'WIRE_IN'
+  | 'JOURNAL'
+  | 'MEMORANDUM'
+  | 'MARGIN_CALL'
+  | 'MONEY_MARKET'
+  | 'SMA_ADJUSTMENT';
 
 // User Type Enum
 export type UserType = 'ADVISOR_USER' | 'BROKER_USER' | 'CLIENT_USER' | 'SYSTEM_USER' | 'UNKNOWN';
@@ -135,16 +336,59 @@ export type AccountType = 'CASH' | 'MARGIN';
 export type CashEquivalentType = 'SWEEP_VEHICLE' | 'SAVINGS' | 'MONEY_MARKET_FUND' | 'UNKNOWN';
 
 // Equity Type Enum
-export type EquityType = 'COMMON_STOCK' | 'PREFERRED_STOCK' | 'DEPOSITORY_RECEIPT' | 'PREFERRED_DEPOSITORY_RECEIPT' | 'RESTRICTED_STOCK' | 'COMPONENT_UNIT' | 'RIGHT' | 'WARRANT' | 'CONVERTIBLE_PREFERRED_STOCK' | 'CONVERTIBLE_STOCK' | 'LIMITED_PARTNERSHIP' | 'WHEN_ISSUED' | 'UNKNOWN';
+export type EquityType =
+  | 'COMMON_STOCK'
+  | 'PREFERRED_STOCK'
+  | 'DEPOSITORY_RECEIPT'
+  | 'PREFERRED_DEPOSITORY_RECEIPT'
+  | 'RESTRICTED_STOCK'
+  | 'COMPONENT_UNIT'
+  | 'RIGHT'
+  | 'WARRANT'
+  | 'CONVERTIBLE_PREFERRED_STOCK'
+  | 'CONVERTIBLE_STOCK'
+  | 'LIMITED_PARTNERSHIP'
+  | 'WHEN_ISSUED'
+  | 'UNKNOWN';
 
 // Fixed Income Type Enum
-export type FixedIncomeType = 'BOND_UNIT' | 'CERTIFICATE_OF_DEPOSIT' | 'CONVERTIBLE_BOND' | 'COLLATERALIZED_MORTGAGE_OBLIGATION' | 'CORPORATE_BOND' | 'GOVERNMENT_MORTGAGE' | 'GNMA_BONDS' | 'MUNICIPAL_ASSESSMENT_DISTRICT' | 'MUNICIPAL_BOND' | 'OTHER_GOVERNMENT' | 'SHORT_TERM_PAPER' | 'US_TREASURY_BOND' | 'US_TREASURY_BILL' | 'US_TREASURY_NOTE' | 'US_TREASURY_ZERO_COUPON' | 'AGENCY_BOND' | 'WHEN_AS_AND_IF_ISSUED_BOND' | 'ASSET_BACKED_SECURITY' | 'UNKNOWN';
+export type FixedIncomeType =
+  | 'BOND_UNIT'
+  | 'CERTIFICATE_OF_DEPOSIT'
+  | 'CONVERTIBLE_BOND'
+  | 'COLLATERALIZED_MORTGAGE_OBLIGATION'
+  | 'CORPORATE_BOND'
+  | 'GOVERNMENT_MORTGAGE'
+  | 'GNMA_BONDS'
+  | 'MUNICIPAL_ASSESSMENT_DISTRICT'
+  | 'MUNICIPAL_BOND'
+  | 'OTHER_GOVERNMENT'
+  | 'SHORT_TERM_PAPER'
+  | 'US_TREASURY_BOND'
+  | 'US_TREASURY_BILL'
+  | 'US_TREASURY_NOTE'
+  | 'US_TREASURY_ZERO_COUPON'
+  | 'AGENCY_BOND'
+  | 'WHEN_AS_AND_IF_ISSUED_BOND'
+  | 'ASSET_BACKED_SECURITY'
+  | 'UNKNOWN';
 
 // Mutual Fund Type Enum
-export type MutualFundType = 'NOT_APPLICABLE' | 'OPEN_END_NON_TAXABLE' | 'OPEN_END_TAXABLE' | 'NO_LOAD_NON_TAXABLE' | 'NO_LOAD_TAXABLE' | 'UNKNOWN';
+export type MutualFundType =
+  | 'NOT_APPLICABLE'
+  | 'OPEN_END_NON_TAXABLE'
+  | 'OPEN_END_TAXABLE'
+  | 'NO_LOAD_NON_TAXABLE'
+  | 'NO_LOAD_TAXABLE'
+  | 'UNKNOWN';
 
 // Collective Investment Type Enum
-export type CollectiveInvestmentType = 'UNIT_INVESTMENT_TRUST' | 'EXCHANGE_TRADED_FUND' | 'CLOSED_END_FUND' | 'INDEX' | 'UNITS';
+export type CollectiveInvestmentType =
+  | 'UNIT_INVESTMENT_TRUST'
+  | 'EXCHANGE_TRADED_FUND'
+  | 'CLOSED_END_FUND'
+  | 'INDEX'
+  | 'UNITS';
 
 // Forex Type Enum
 export type ForexType = 'CURRENCY_PAIR' | 'CURRENCY_OPTION' | 'CURRENCY_FUTURE';
@@ -375,7 +619,12 @@ export interface OrderLeg {
 }
 
 // Account Instrument Union Type (for account operations)
-export type AccountInstrument = AccountCashEquivalent | AccountEquity | AccountFixedIncome | AccountMutualFund | AccountOption;
+export type AccountInstrument =
+  | AccountCashEquivalent
+  | AccountEquity
+  | AccountFixedIncome
+  | AccountMutualFund
+  | AccountOption;
 
 // Order Leg Collection
 export interface OrderLegCollection {
@@ -871,7 +1120,7 @@ export interface AccountMutualFund extends MutualFund {}
 export interface AccountOption extends Option {}
 
 // Transaction Instrument Union Type (for transaction operations)
-export type TransactionInstrument = 
+export type TransactionInstrument =
   | TransactionCashEquivalent
   | CollectiveInvestment
   | Currency
@@ -882,4 +1131,4 @@ export type TransactionInstrument =
   | Index
   | TransactionMutualFund
   | TransactionOption
-  | Product; 
+  | Product;
