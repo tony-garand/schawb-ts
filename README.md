@@ -172,9 +172,6 @@ interface SchwabClientConfig {
   clientSecret: string;
   redirectUri: string;
   environment?: 'sandbox' | 'production';
-  rateLimiting?: RateLimitConfig;
-  timeout?: number;
-  retries?: number;
 }
 ```
 

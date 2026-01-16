@@ -1,5 +1,6 @@
 import { Commission, ComplexOrderStrategyType, Fees, Order, OrderResponse, OrderValidationDetail } from '../types';
 import { SchwabOAuth } from '../auth/oauth';
+import { fetchJson } from '../utils/http';
 
 // Order status types based on Schwab API documentation
 export type OrderStatus = 
@@ -151,8 +152,8 @@ export class OrdersAPI {
     body?: string;
   } = {}): Promise<unknown> {
     const authHeader = await this.oauth.getAuthorizationHeader();
-    const response = await fetch(url, {
-      method: options.method || 'GET',
+    return fetchJson(url, {
+      method: options.method ?? 'GET',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': authHeader,
@@ -160,19 +161,6 @@ export class OrdersAPI {
       },
       body: options.body,
     });
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`HTTP ${response.status}: ${errorText}`);
-    }
-    
-    // Handle empty responses (like for DELETE operations)
-    if (response.status === 200 || response.status === 201) {
-      const text = await response.text();
-      return text ? JSON.parse(text) : null;
-    }
-    
-    return response.json();
   }
 
   /**

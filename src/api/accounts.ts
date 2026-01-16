@@ -5,6 +5,7 @@ import {
   Position 
 } from '../types';
 import { SchwabOAuth } from '../auth/oauth';
+import { fetchJson } from '../utils/http';
 
 export class AccountsAPI {
   private oauth: SchwabOAuth;
@@ -23,8 +24,8 @@ export class AccountsAPI {
     body?: string;
   } = {}): Promise<unknown> {
     const authHeader = await this.oauth.getAuthorizationHeader();
-    const response = await fetch(url, {
-      method: options.method || 'GET',
+    return fetchJson(url, {
+      method: options.method ?? 'GET',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': authHeader,
@@ -32,11 +33,6 @@ export class AccountsAPI {
       },
       body: options.body,
     });
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`HTTP ${response.status}: ${errorText}`);
-    }
-    return response.json();
   }
 
   /**

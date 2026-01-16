@@ -2,6 +2,7 @@ import {
   OAuthTokens, 
   OAuthConfig
 } from '../types';
+import { fetchJson } from '../utils/http';
 
 export class SchwabOAuth {
   private config: OAuthConfig;
@@ -20,21 +21,14 @@ export class SchwabOAuth {
     headers?: Record<string, string>;
     body?: string;
   } = {}): Promise<unknown> {
-    const response = await fetch(url, {
-      method: options.method || 'GET',
+    return fetchJson(url, {
+      method: options.method ?? 'GET',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
         ...options.headers,
       },
       body: options.body,
     });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`HTTP ${response.status}: ${errorText}`);
-    }
-
-    return response.json();
   }
 
   /**
