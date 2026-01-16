@@ -1,7 +1,7 @@
 import { SchwabOAuth } from './auth/oauth';
 import { SchwabTradingAPI } from './api/trading';
 import { AccountsAPI } from './api/accounts';
-import { OrdersAPI, OrderQueryParams } from './api/orders';
+import { OrdersAPI, OrderExtended, OrderPreviewResponse, OrderQueryParams } from './api/orders';
 import { TransactionsAPI, TransactionQueryParams, Transaction, TransactionType } from './api/transactions';
 import { UserPreferenceAPI } from './api/userPreference';
 import { MarketDataAPI, QuoteRequestParams, QuoteResponse, MarketDataQuote, OptionChainRequestParams, OptionChainResponse, OptionExpirationChainResponse, PriceHistoryRequestParams, PriceHistoryResponse, PeriodType, FrequencyType, MoversResponse, MarketHoursRequestParams, MarketHoursResponse, MarketType, MoversRequestParams, MoversSymbolId, MoversSort, MoversFrequency, InstrumentsRequestParams, InstrumentsResponse, Instrument, InstrumentProjection } from './api/marketData';
@@ -125,7 +125,7 @@ export class SchwabClient {
    * @param accountNumber Account number
    * @returns Promise with order details
    */
-  public async getOrder(orderId: number, accountNumber: string): Promise<unknown> {
+  public async getOrder(orderId: number, accountNumber: string): Promise<OrderExtended> {
     return this.orders.getOrder(accountNumber, orderId);
   }
 
@@ -156,7 +156,7 @@ export class SchwabClient {
    * @param params Query parameters for filtering orders
    * @returns Promise with orders list
    */
-  public async getOrdersForAccount(accountNumber: string, params?: OrderQueryParams): Promise<unknown[]> {
+  public async getOrdersForAccount(accountNumber: string, params?: OrderQueryParams): Promise<OrderExtended[]> {
     return this.orders.getOrdersForAccount(accountNumber, params || {});
   }
 
@@ -165,7 +165,7 @@ export class SchwabClient {
    * @param params Query parameters for filtering orders
    * @returns Promise with orders list
    */
-  public async getAllOrders(params?: OrderQueryParams): Promise<unknown[]> {
+  public async getAllOrders(params?: OrderQueryParams): Promise<OrderExtended[]> {
     return this.orders.getAllOrders(params || {});
   }
 
@@ -175,7 +175,7 @@ export class SchwabClient {
    * @param order Order object to preview
    * @returns Promise with order preview response
    */
-  public async previewOrder(accountNumber: string, order: Order): Promise<unknown> {
+  public async previewOrder(accountNumber: string, order: Order): Promise<OrderPreviewResponse> {
     return this.orders.previewOrder(accountNumber, order);
   }
 
