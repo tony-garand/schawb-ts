@@ -386,7 +386,8 @@ export async function clientFromLoginFlow(options: LoginFlowOptions): Promise<Sc
     const open = await getOpenBrowser();
     await open(authUrl);
   } catch (error) {
-    console.log('Could not open browser automatically.');
+    const reason = error instanceof Error ? error.message : String(error);
+    console.log(`Could not open browser automatically (${reason}).`);
     console.log(`Please open this URL manually: ${authUrl}`);
   }
 
