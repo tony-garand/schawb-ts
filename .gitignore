@@ -21,6 +21,10 @@ yarn-error.log*
 .env.local
 .env.*.local
 
+# OAuth token files (contain live credentials)
+schwab-token.json
+*token*.json
+
 # Test coverage
 coverage/
 

@@ -62,7 +62,7 @@ describe('MarketDataAPI', () => {
           method: 'GET',
           headers: expect.objectContaining({
             'Authorization': 'Bearer mock-token',
-            'Content-Type': 'application/json',
+            'Accept': 'application/json',
           }),
         })
       );
@@ -85,7 +85,7 @@ describe('MarketDataAPI', () => {
           method: 'GET',
           headers: expect.objectContaining({
             'Authorization': 'Bearer mock-token',
-            'Content-Type': 'application/json',
+            'Accept': 'application/json',
           }),
         })
       );
@@ -149,7 +149,7 @@ describe('MarketDataAPI', () => {
           method: 'GET',
           headers: expect.objectContaining({
             'Authorization': 'Bearer mock-token',
-            'Content-Type': 'application/json',
+            'Accept': 'application/json',
           }),
         })
       );
@@ -169,7 +169,7 @@ describe('MarketDataAPI', () => {
           method: 'GET',
           headers: expect.objectContaining({
             'Authorization': 'Bearer mock-token',
-            'Content-Type': 'application/json',
+            'Accept': 'application/json',
           }),
         })
       );
@@ -198,7 +198,7 @@ describe('MarketDataAPI', () => {
           method: 'GET',
           headers: expect.objectContaining({
             'Authorization': 'Bearer mock-token',
-            'Content-Type': 'application/json',
+            'Accept': 'application/json',
           }),
         })
       );
@@ -241,7 +241,7 @@ describe('MarketDataAPI', () => {
           method: 'GET',
           headers: expect.objectContaining({
             'Authorization': 'Bearer mock-token',
-            'Content-Type': 'application/json',
+            'Accept': 'application/json',
           }),
         })
       );

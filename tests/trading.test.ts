@@ -61,12 +61,12 @@ describe('SchwabTradingAPI', () => {
 
       expect(result).toEqual(mockQuote);
       expect(global.fetch).toHaveBeenCalledWith(
-        'https://api.schwabapi.com/v1/sandbox/marketdata/quotes/AAPL',
+        'https://api.schwabapi.com/v1/sandbox/AAPL/quotes',
         expect.objectContaining({
           method: 'GET',
           headers: expect.objectContaining({
             'Authorization': 'Bearer mock-token',
-            'Content-Type': 'application/json',
+            'Accept': 'application/json',
           }),
         })
       );
@@ -101,7 +101,7 @@ describe('SchwabTradingAPI', () => {
 
       expect(result).toEqual(mockQuotes);
       expect(global.fetch).toHaveBeenCalledWith(
-        'https://api.schwabapi.com/v1/sandbox/marketdata/quotes?symbols=AAPL,MSFT',
+        'https://api.schwabapi.com/v1/sandbox/quotes?symbols=AAPL,MSFT',
         expect.any(Object)
       );
     });
@@ -141,7 +141,7 @@ describe('SchwabTradingAPI', () => {
 
       expect(result).toEqual(mockHours);
       expect(global.fetch).toHaveBeenCalledWith(
-        'https://api.schwabapi.com/v1/sandbox/marketdata/hours?date=2024-01-15&market=EQUITY',
+        'https://api.schwabapi.com/v1/sandbox/markets?markets=equity&date=2024-01-15',
         expect.any(Object)
       );
     });
@@ -157,7 +157,7 @@ describe('SchwabTradingAPI', () => {
       await tradingAPI.getMarketHours('2024-01-15');
 
       expect(global.fetch).toHaveBeenCalledWith(
-        'https://api.schwabapi.com/v1/sandbox/marketdata/hours?date=2024-01-15&market=EQUITY',
+        'https://api.schwabapi.com/v1/sandbox/markets?markets=equity&date=2024-01-15',
         expect.any(Object)
       );
     });
@@ -292,7 +292,7 @@ describe('SchwabTradingAPI', () => {
       await prodAPI.getQuote('AAPL');
 
       expect(global.fetch).toHaveBeenCalledWith(
-        'https://api.schwabapi.com/v1/marketdata/quotes/AAPL',
+        'https://api.schwabapi.com/marketdata/v1/AAPL/quotes',
         expect.any(Object)
       );
     });
@@ -324,7 +324,7 @@ describe('SchwabTradingAPI', () => {
       const headers = fetchCall[1].headers;
 
       expect(headers['Authorization']).toBe('Bearer mock-token');
-      expect(headers['Content-Type']).toBe('application/json');
+      expect(headers['Accept']).toBe('application/json');
     });
   });
 });

@@ -10,9 +10,9 @@ export class SchwabTradingAPI {
 
   constructor(oauth: SchwabOAuth, environment: 'sandbox' | 'production' = 'production') {
     this.oauth = oauth;
-    this.baseUrl = environment === 'sandbox' 
-      ? 'https://api.schwabapi.com/v1/sandbox' 
-      : 'https://api.schwabapi.com/v1';
+    this.baseUrl = environment === 'sandbox'
+      ? 'https://api.schwabapi.com/v1/sandbox'
+      : 'https://api.schwabapi.com/marketdata/v1';
   }
 
   /**
@@ -28,8 +28,11 @@ export class SchwabTradingAPI {
     const response = await fetch(url, {
       method: options.method || 'GET',
       headers: {
-        'Content-Type': 'application/json',
+        'Accept': 'application/json',
         'Authorization': authHeader,
+        // Schwab returns HTTP 400 when Content-Type is sent on a bodyless request,
+        // so only include it when there is a request body.
+        ...(options.body ? { 'Content-Type': 'application/json' } : {}),
         ...options.headers,
       },
       body: options.body,
@@ -51,7 +54,7 @@ export class SchwabTradingAPI {
   public async getQuote(symbol: string): Promise<Quote> {
     try {
       const response = await this.makeRequest(
-        `${this.baseUrl}/marketdata/quotes/${symbol}`
+        `${this.baseUrl}/${encodeURIComponent(symbol)}/quotes`
       );
       return response as Quote;
     } catch (error) {
@@ -67,7 +70,7 @@ export class SchwabTradingAPI {
   public async getQuotes(symbols: string[]): Promise<Quote[]> {
     try {
       const response = await this.makeRequest(
-        `${this.baseUrl}/marketdata/quotes?symbols=${symbols.join(',')}`
+        `${this.baseUrl}/quotes?symbols=${symbols.join(',')}`
       );
       return response as Quote[];
     } catch (error) {
@@ -84,7 +87,7 @@ export class SchwabTradingAPI {
   public async getMarketHours(date: string, market: string = 'EQUITY'): Promise<MarketHours> {
     try {
       const response = await this.makeRequest(
-        `${this.baseUrl}/marketdata/hours?date=${date}&market=${market}`
+        `${this.baseUrl}/markets?markets=${market.toLowerCase()}&date=${date}`
       );
       return response as MarketHours;
     } catch (error) {

@@ -60,7 +60,7 @@ describe('OrdersAPI', () => {
           method: 'GET',
           headers: expect.objectContaining({
             'Authorization': 'Bearer mock-token',
-            'Content-Type': 'application/json',
+            'Accept': 'application/json',
           }),
         })
       );

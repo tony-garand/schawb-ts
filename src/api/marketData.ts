@@ -196,7 +196,7 @@ export class MarketDataAPI {
     this.baseUrl =
       environment === 'sandbox'
         ? 'https://api-sandbox.schwab.com/marketdata/v1'
-        : 'https://api.schwab.com/marketdata/v1';
+        : 'https://api.schwabapi.com/marketdata/v1';
   }
 
   private async makeRequest(
@@ -215,8 +215,11 @@ export class MarketDataAPI {
     const response = await fetch(url, {
       method: options.method || 'GET',
       headers: {
+        'Accept': 'application/json',
         Authorization: `Bearer ${tokens.access_token}`,
-        'Content-Type': 'application/json',
+        // Schwab returns HTTP 400 when Content-Type is sent on a bodyless request,
+        // so only include it when there is a request body.
+        ...(options.body ? { 'Content-Type': 'application/json' } : {}),
         ...options.headers,
       },
       body: options.body,

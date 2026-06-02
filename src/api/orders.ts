@@ -140,9 +140,9 @@ export class OrdersAPI {
 
   constructor(oauth: SchwabOAuth, environment: 'sandbox' | 'production' = 'production') {
     this.oauth = oauth;
-    this.baseUrl = environment === 'sandbox' 
-      ? 'https://api.schwabapi.com/v1/sandbox' 
-      : 'https://api.schwabapi.com/v1';
+    this.baseUrl = environment === 'sandbox'
+      ? 'https://api.schwabapi.com/v1/sandbox'
+      : 'https://api.schwabapi.com/trader/v1';
   }
 
   private async makeRequest(url: string, options: {
@@ -154,8 +154,11 @@ export class OrdersAPI {
     const response = await fetch(url, {
       method: options.method || 'GET',
       headers: {
-        'Content-Type': 'application/json',
+        'Accept': 'application/json',
         'Authorization': authHeader,
+        // Schwab returns HTTP 400 when Content-Type is sent on a bodyless request,
+        // so only include it when there is a request body.
+        ...(options.body ? { 'Content-Type': 'application/json' } : {}),
         ...options.headers,
       },
       body: options.body,
