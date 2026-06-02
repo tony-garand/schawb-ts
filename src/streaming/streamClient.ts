@@ -669,19 +669,19 @@ export class StreamClient {
   private isLoggedIn: boolean = false;
 
   // Message handlers for each service
-  private levelOneEquityHandlers: StreamMessageHandler[] = [];
-  private levelOneOptionHandlers: StreamMessageHandler[] = [];
-  private levelOneFuturesHandlers: StreamMessageHandler[] = [];
-  private levelOneFuturesOptionsHandlers: StreamMessageHandler[] = [];
-  private levelOneForexHandlers: StreamMessageHandler[] = [];
-  private chartEquityHandlers: StreamMessageHandler[] = [];
-  private chartFuturesHandlers: StreamMessageHandler[] = [];
-  private nyseBookHandlers: StreamMessageHandler[] = [];
-  private nasdaqBookHandlers: StreamMessageHandler[] = [];
-  private optionsBookHandlers: StreamMessageHandler[] = [];
-  private screenerEquityHandlers: StreamMessageHandler[] = [];
-  private screenerOptionHandlers: StreamMessageHandler[] = [];
-  private accountActivityHandlers: StreamMessageHandler[] = [];
+  private levelOneEquityHandlers: Set<StreamMessageHandler> = new Set();
+  private levelOneOptionHandlers: Set<StreamMessageHandler> = new Set();
+  private levelOneFuturesHandlers: Set<StreamMessageHandler> = new Set();
+  private levelOneFuturesOptionsHandlers: Set<StreamMessageHandler> = new Set();
+  private levelOneForexHandlers: Set<StreamMessageHandler> = new Set();
+  private chartEquityHandlers: Set<StreamMessageHandler> = new Set();
+  private chartFuturesHandlers: Set<StreamMessageHandler> = new Set();
+  private nyseBookHandlers: Set<StreamMessageHandler> = new Set();
+  private nasdaqBookHandlers: Set<StreamMessageHandler> = new Set();
+  private optionsBookHandlers: Set<StreamMessageHandler> = new Set();
+  private screenerEquityHandlers: Set<StreamMessageHandler> = new Set();
+  private screenerOptionHandlers: Set<StreamMessageHandler> = new Set();
+  private accountActivityHandlers: Set<StreamMessageHandler> = new Set();
 
   // Pending responses for request/response matching
   private pendingRequests: Map<
@@ -689,11 +689,16 @@ export class StreamClient {
     {
       resolve: (value: unknown) => void;
       reject: (reason: unknown) => void;
+      timeoutId: ReturnType<typeof setTimeout>;
     }
   > = new Map();
 
-  // Message queue for async handling
+  // Message queue for async handling (consumed by handleMessage())
   private messageQueue: StreamMessage[] = [];
+  // Consumers awaiting the next message — woken directly on arrival instead of polling.
+  private messageWaiters: Array<(msg: StreamMessage | null) => void> = [];
+  // Bound the queue so a slow/absent consumer cannot grow it without limit.
+  private static readonly MAX_QUEUE_SIZE = 10000;
 
   constructor(client: SchwabClient, accountId: string) {
     this.client = client;
@@ -768,6 +773,8 @@ export class StreamClient {
       this.ws.on('close', () => {
         this.isLoggedIn = false;
         this.ws = null;
+        // Wake any consumers blocked in handleMessage() so they don't hang.
+        this.flushWaiters();
       });
     });
   }
@@ -785,6 +792,7 @@ export class StreamClient {
           const requestId = response.requestid;
           const pending = this.pendingRequests.get(requestId);
           if (pending) {
+            clearTimeout(pending.timeoutId);
             const code = response.content?.code;
             if (
               code === StreamerResponseCode.SUCCESS ||
@@ -808,7 +816,7 @@ export class StreamClient {
       if (parsed.data) {
         for (const dataItem of parsed.data) {
           const message = this.relabelMessage(dataItem);
-          this.messageQueue.push(message);
+          this.enqueueMessage(message);
           this.dispatchMessage(message);
         }
       }
@@ -976,16 +984,16 @@ export class StreamClient {
     };
 
     return new Promise((resolve, reject) => {
-      this.pendingRequests.set(requestId, { resolve, reject });
-      this.ws!.send(JSON.stringify(request));
-
-      // Timeout after 30 seconds
-      setTimeout(() => {
+      // Timeout after 30 seconds. The id is stored so it can be cleared as soon
+      // as a response arrives, instead of leaking a live timer for 30s.
+      const timeoutId = setTimeout(() => {
         if (this.pendingRequests.has(requestId)) {
           this.pendingRequests.delete(requestId);
           reject(new Error('Request timeout'));
         }
       }, 30000);
+      this.pendingRequests.set(requestId, { resolve, reject, timeoutId });
+      this.ws!.send(JSON.stringify(request));
     });
   }
 
@@ -1054,23 +1062,46 @@ export class StreamClient {
    * Returns the next message or waits for one to arrive.
    */
   async handleMessage(): Promise<StreamMessage | null> {
-    return new Promise((resolve) => {
-      if (this.messageQueue.length > 0) {
-        resolve(this.messageQueue.shift()!);
-      } else {
-        // Wait for next message
-        const checkQueue = () => {
-          if (this.messageQueue.length > 0) {
-            resolve(this.messageQueue.shift()!);
-          } else if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-            resolve(null);
-          } else {
-            setTimeout(checkQueue, 10);
-          }
-        };
-        checkQueue();
-      }
+    if (this.messageQueue.length > 0) {
+      return this.messageQueue.shift()!;
+    }
+    if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
+      return null;
+    }
+    // Block until the next message arrives (resolved by enqueueMessage) or the
+    // socket closes (resolved with null by flushWaiters) — no polling.
+    return new Promise<StreamMessage | null>((resolve) => {
+      this.messageWaiters.push(resolve);
     });
+  }
+
+  /**
+   * Enqueue an incoming message. If a consumer is already waiting in
+   * handleMessage(), hand the message straight to it; otherwise buffer it,
+   * dropping the oldest message if the bounded queue is full.
+   */
+  private enqueueMessage(message: StreamMessage): void {
+    const waiter = this.messageWaiters.shift();
+    if (waiter) {
+      waiter(message);
+      return;
+    }
+    this.messageQueue.push(message);
+    if (this.messageQueue.length > StreamClient.MAX_QUEUE_SIZE) {
+      this.messageQueue.shift();
+      console.warn(
+        `StreamClient: message queue exceeded ${StreamClient.MAX_QUEUE_SIZE}; dropping oldest message`
+      );
+    }
+  }
+
+  /** Resolve all blocked handleMessage() consumers with null (e.g. on close). */
+  private flushWaiters(): void {
+    const waiters = this.messageWaiters;
+    this.messageWaiters = [];
+    for (const resolve of waiters) {
+      resolve(null);
+    }
   }
 
   /**
@@ -1131,7 +1162,7 @@ export class StreamClient {
    * Add handler for Level One equity messages
    */
   addLevelOneEquityHandler(handler: StreamMessageHandler): void {
-    this.levelOneEquityHandlers.push(handler);
+    this.levelOneEquityHandlers.add(handler);
   }
 
   // ==================== LEVELONE_OPTIONS ====================
@@ -1180,7 +1211,7 @@ export class StreamClient {
    * Add handler for Level One option messages
    */
   addLevelOneOptionHandler(handler: StreamMessageHandler): void {
-    this.levelOneOptionHandlers.push(handler);
+    this.levelOneOptionHandlers.add(handler);
   }
 
   // ==================== LEVELONE_FUTURES ====================
@@ -1229,7 +1260,7 @@ export class StreamClient {
    * Add handler for Level One futures messages
    */
   addLevelOneFuturesHandler(handler: StreamMessageHandler): void {
-    this.levelOneFuturesHandlers.push(handler);
+    this.levelOneFuturesHandlers.add(handler);
   }
 
   // ==================== LEVELONE_FUTURES_OPTIONS ====================
@@ -1280,7 +1311,7 @@ export class StreamClient {
    * Add handler for Level One futures options messages
    */
   addLevelOneFuturesOptionsHandler(handler: StreamMessageHandler): void {
-    this.levelOneFuturesOptionsHandlers.push(handler);
+    this.levelOneFuturesOptionsHandlers.add(handler);
   }
 
   // ==================== LEVELONE_FOREX ====================
@@ -1325,7 +1356,7 @@ export class StreamClient {
    * Add handler for Level One forex messages
    */
   addLevelOneForexHandler(handler: StreamMessageHandler): void {
-    this.levelOneForexHandlers.push(handler);
+    this.levelOneForexHandlers.add(handler);
   }
 
   // ==================== CHART_EQUITY ====================
@@ -1370,7 +1401,7 @@ export class StreamClient {
    * Add handler for equity chart messages
    */
   addChartEquityHandler(handler: StreamMessageHandler): void {
-    this.chartEquityHandlers.push(handler);
+    this.chartEquityHandlers.add(handler);
   }
 
   // ==================== CHART_FUTURES ====================
@@ -1415,7 +1446,7 @@ export class StreamClient {
    * Add handler for futures chart messages
    */
   addChartFuturesHandler(handler: StreamMessageHandler): void {
-    this.chartFuturesHandlers.push(handler);
+    this.chartFuturesHandlers.add(handler);
   }
 
   // ==================== NYSE_BOOK ====================
@@ -1453,7 +1484,7 @@ export class StreamClient {
    * Add handler for NYSE book messages
    */
   addNyseBookHandler(handler: StreamMessageHandler): void {
-    this.nyseBookHandlers.push(handler);
+    this.nyseBookHandlers.add(handler);
   }
 
   // ==================== NASDAQ_BOOK ====================
@@ -1491,7 +1522,7 @@ export class StreamClient {
    * Add handler for NASDAQ book messages
    */
   addNasdaqBookHandler(handler: StreamMessageHandler): void {
-    this.nasdaqBookHandlers.push(handler);
+    this.nasdaqBookHandlers.add(handler);
   }
 
   // ==================== OPTIONS_BOOK ====================
@@ -1529,7 +1560,7 @@ export class StreamClient {
    * Add handler for options book messages
    */
   addOptionsBookHandler(handler: StreamMessageHandler): void {
-    this.optionsBookHandlers.push(handler);
+    this.optionsBookHandlers.add(handler);
   }
 
   // ==================== SCREENER_EQUITY ====================
@@ -1579,7 +1610,7 @@ export class StreamClient {
    * Add handler for equity screener messages
    */
   addScreenerEquityHandler(handler: StreamMessageHandler): void {
-    this.screenerEquityHandlers.push(handler);
+    this.screenerEquityHandlers.add(handler);
   }
 
   // ==================== SCREENER_OPTION ====================
@@ -1626,7 +1657,7 @@ export class StreamClient {
    * Add handler for option screener messages
    */
   addScreenerOptionHandler(handler: StreamMessageHandler): void {
-    this.screenerOptionHandlers.push(handler);
+    this.screenerOptionHandlers.add(handler);
   }
 
   // ==================== ACCT_ACTIVITY ====================
@@ -1658,7 +1689,7 @@ export class StreamClient {
    * Add handler for account activity messages
    */
   addAccountActivityHandler(handler: StreamMessageHandler): void {
-    this.accountActivityHandlers.push(handler);
+    this.accountActivityHandlers.add(handler);
   }
 
   // ==================== Quality of Service ====================
@@ -1686,10 +1717,7 @@ export class StreamClient {
    * Remove a handler from Level One equity messages
    */
   removeLevelOneEquityHandler(handler: StreamMessageHandler): void {
-    const index = this.levelOneEquityHandlers.indexOf(handler);
-    if (index > -1) {
-      this.levelOneEquityHandlers.splice(index, 1);
-    }
+    this.levelOneEquityHandlers.delete(handler);
   }
 
   /**
@@ -1698,43 +1726,43 @@ export class StreamClient {
   clearHandlers(service: string): void {
     switch (service) {
       case 'LEVELONE_EQUITIES':
-        this.levelOneEquityHandlers = [];
+        this.levelOneEquityHandlers.clear();
         break;
       case 'LEVELONE_OPTIONS':
-        this.levelOneOptionHandlers = [];
+        this.levelOneOptionHandlers.clear();
         break;
       case 'LEVELONE_FUTURES':
-        this.levelOneFuturesHandlers = [];
+        this.levelOneFuturesHandlers.clear();
         break;
       case 'LEVELONE_FUTURES_OPTIONS':
-        this.levelOneFuturesOptionsHandlers = [];
+        this.levelOneFuturesOptionsHandlers.clear();
         break;
       case 'LEVELONE_FOREX':
-        this.levelOneForexHandlers = [];
+        this.levelOneForexHandlers.clear();
         break;
       case 'CHART_EQUITY':
-        this.chartEquityHandlers = [];
+        this.chartEquityHandlers.clear();
         break;
       case 'CHART_FUTURES':
-        this.chartFuturesHandlers = [];
+        this.chartFuturesHandlers.clear();
         break;
       case 'NYSE_BOOK':
-        this.nyseBookHandlers = [];
+        this.nyseBookHandlers.clear();
         break;
       case 'NASDAQ_BOOK':
-        this.nasdaqBookHandlers = [];
+        this.nasdaqBookHandlers.clear();
         break;
       case 'OPTIONS_BOOK':
-        this.optionsBookHandlers = [];
+        this.optionsBookHandlers.clear();
         break;
       case 'SCREENER_EQUITY':
-        this.screenerEquityHandlers = [];
+        this.screenerEquityHandlers.clear();
         break;
       case 'SCREENER_OPTION':
-        this.screenerOptionHandlers = [];
+        this.screenerOptionHandlers.clear();
         break;
       case 'ACCT_ACTIVITY':
-        this.accountActivityHandlers = [];
+        this.accountActivityHandlers.clear();
         break;
     }
   }
@@ -1743,18 +1771,18 @@ export class StreamClient {
    * Clear all handlers for all services
    */
   clearAllHandlers(): void {
-    this.levelOneEquityHandlers = [];
-    this.levelOneOptionHandlers = [];
-    this.levelOneFuturesHandlers = [];
-    this.levelOneFuturesOptionsHandlers = [];
-    this.levelOneForexHandlers = [];
-    this.chartEquityHandlers = [];
-    this.chartFuturesHandlers = [];
-    this.nyseBookHandlers = [];
-    this.nasdaqBookHandlers = [];
-    this.optionsBookHandlers = [];
-    this.screenerEquityHandlers = [];
-    this.screenerOptionHandlers = [];
-    this.accountActivityHandlers = [];
+    this.levelOneEquityHandlers.clear();
+    this.levelOneOptionHandlers.clear();
+    this.levelOneFuturesHandlers.clear();
+    this.levelOneFuturesOptionsHandlers.clear();
+    this.levelOneForexHandlers.clear();
+    this.chartEquityHandlers.clear();
+    this.chartFuturesHandlers.clear();
+    this.nyseBookHandlers.clear();
+    this.nasdaqBookHandlers.clear();
+    this.optionsBookHandlers.clear();
+    this.screenerEquityHandlers.clear();
+    this.screenerOptionHandlers.clear();
+    this.accountActivityHandlers.clear();
   }
 }
