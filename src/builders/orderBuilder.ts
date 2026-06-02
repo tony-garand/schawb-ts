@@ -57,8 +57,10 @@ export class OrderBuilder {
     return this;
   }
 
-  public setPrice(price: number): OrderBuilder {
-    this.order.price = price;
+  public setPrice(price: number | undefined): OrderBuilder {
+    if (price !== undefined) {
+      this.order.price = price;
+    }
     return this;
   }
 

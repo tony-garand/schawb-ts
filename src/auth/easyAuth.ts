@@ -375,7 +375,7 @@ export async function clientFromLoginFlow(options: LoginFlowOptions): Promise<Sc
 
     // Close server after receiving callback
     const originalResolve = resolve;
-    resolve = (code: string) => {
+    resolve = (code: string | PromiseLike<string>) => {
       server.close();
       originalResolve(code);
     };
