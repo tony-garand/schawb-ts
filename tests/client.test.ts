@@ -4,7 +4,6 @@ import { OrderBuilder, OrderLegBuilder } from '../src/builders/orderBuilder';
 
 // Mock all API modules
 jest.mock('../src/auth/oauth');
-jest.mock('../src/api/trading');
 jest.mock('../src/api/accounts');
 jest.mock('../src/api/orders');
 jest.mock('../src/api/transactions');
@@ -946,83 +945,83 @@ describe('SchwabClient', () => {
     });
   });
 
-  describe('Trading API Methods', () => {
+  describe('Market Data convenience methods', () => {
     describe('getQuote', () => {
-      it('should get quote from trading API', async () => {
+      it('should delegate to marketData.getQuoteBySymbol', async () => {
         const mockQuote = { symbol: 'AAPL', lastPrice: 150.00 };
-        (client as any).tradingAPI.getQuote = jest.fn().mockResolvedValue(mockQuote);
+        client.marketData.getQuoteBySymbol = jest.fn().mockResolvedValue(mockQuote);
 
         const result = await client.getQuote('AAPL');
 
-        expect((client as any).tradingAPI.getQuote).toHaveBeenCalledWith('AAPL');
+        expect(client.marketData.getQuoteBySymbol).toHaveBeenCalledWith('AAPL');
         expect(result).toEqual(mockQuote);
       });
     });
 
     describe('getQuotes', () => {
-      it('should get quotes from trading API', async () => {
-        const mockQuotes = [{ symbol: 'AAPL' }, { symbol: 'MSFT' }];
-        (client as any).tradingAPI.getQuotes = jest.fn().mockResolvedValue(mockQuotes);
+      it('should delegate to marketData.getQuotesForSymbols', async () => {
+        const mockQuotes = { AAPL: {}, MSFT: {} };
+        client.marketData.getQuotesForSymbols = jest.fn().mockResolvedValue(mockQuotes);
 
         const result = await client.getQuotes(['AAPL', 'MSFT']);
 
-        expect((client as any).tradingAPI.getQuotes).toHaveBeenCalledWith(['AAPL', 'MSFT']);
+        expect(client.marketData.getQuotesForSymbols).toHaveBeenCalledWith(['AAPL', 'MSFT']);
         expect(result).toEqual(mockQuotes);
       });
     });
 
     describe('getMarketHours', () => {
-      it('should get market hours from trading API', async () => {
+      it('should delegate to marketData.getMarketHoursForMarkets', async () => {
         const mockHours = { isOpen: true };
-        (client as any).tradingAPI.getMarketHours = jest.fn().mockResolvedValue(mockHours);
+        client.marketData.getMarketHoursForMarkets = jest.fn().mockResolvedValue(mockHours);
 
         const result = await client.getMarketHours('2024-01-15', 'EQUITY');
 
-        expect((client as any).tradingAPI.getMarketHours).toHaveBeenCalledWith('2024-01-15', 'EQUITY');
+        expect(client.marketData.getMarketHoursForMarkets).toHaveBeenCalledWith(['EQUITY'], '2024-01-15');
         expect(result).toEqual(mockHours);
       });
 
       it('should use default EQUITY market', async () => {
         const mockHours = { isOpen: true };
-        (client as any).tradingAPI.getMarketHours = jest.fn().mockResolvedValue(mockHours);
+        client.marketData.getMarketHoursForMarkets = jest.fn().mockResolvedValue(mockHours);
 
         const result = await client.getMarketHours('2024-01-15');
 
-        expect((client as any).tradingAPI.getMarketHours).toHaveBeenCalledWith('2024-01-15', 'EQUITY');
+        expect(client.marketData.getMarketHoursForMarkets).toHaveBeenCalledWith(['EQUITY'], '2024-01-15');
         expect(result).toEqual(mockHours);
       });
     });
 
     describe('searchInstruments', () => {
-      it('should search instruments from trading API', async () => {
-        const mockResults = [{ symbol: 'AAPL' }];
-        (client as any).tradingAPI.searchInstruments = jest.fn().mockResolvedValue(mockResults);
+      it('should delegate to marketData.searchInstruments', async () => {
+        const mockResults = { instruments: [{ symbol: 'AAPL' }] };
+        client.marketData.searchInstruments = jest.fn().mockResolvedValue(mockResults);
 
         const result = await client.searchInstruments('AAPL', 'symbol-search');
 
-        expect((client as any).tradingAPI.searchInstruments).toHaveBeenCalledWith('AAPL', 'symbol-search');
+        expect(client.marketData.searchInstruments).toHaveBeenCalledWith('AAPL', 'symbol-search');
         expect(result).toEqual(mockResults);
       });
 
       it('should use default projection', async () => {
-        const mockResults = [{ symbol: 'AAPL' }];
-        (client as any).tradingAPI.searchInstruments = jest.fn().mockResolvedValue(mockResults);
+        const mockResults = { instruments: [{ symbol: 'AAPL' }] };
+        client.marketData.searchInstruments = jest.fn().mockResolvedValue(mockResults);
 
         const result = await client.searchInstruments('AAPL');
 
-        expect((client as any).tradingAPI.searchInstruments).toHaveBeenCalledWith('AAPL', 'symbol-search');
+        expect(client.marketData.searchInstruments).toHaveBeenCalledWith('AAPL', 'symbol-search');
         expect(result).toEqual(mockResults);
       });
     });
 
     describe('getInstrument', () => {
-      it('should get instrument from trading API', async () => {
+      it('should delegate to marketData.getInstrumentByCusip', async () => {
         const mockInstrument = { symbol: 'AAPL', cusip: '037833100' };
-        (client as any).tradingAPI.getInstrument = jest.fn().mockResolvedValue(mockInstrument);
+        client.marketData.getInstrumentByCusip = jest.fn().mockResolvedValue(mockInstrument);
 
-        const result = await client.getInstrument('AAPL');
+        const result = await client.getInstrument('037833100');
 
-        expect((client as any).tradingAPI.getInstrument).toHaveBeenCalledWith('AAPL');
+        expect(client.marketData.getInstrumentByCusip).toHaveBeenCalledWith('037833100');
         expect(result).toEqual(mockInstrument);
       });
     });

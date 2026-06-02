@@ -59,7 +59,7 @@ Notes:
 `);
 }
 
-function parseArgs(args: string[]): CLIArgs {
+export function parseArgs(args: string[]): CLIArgs {
   const result: CLIArgs = {
     tokenFile: '',
     apiKey: '',
@@ -103,7 +103,7 @@ function parseArgs(args: string[]): CLIArgs {
   return result;
 }
 
-function validateArgs(args: CLIArgs): string[] {
+export function validateArgs(args: CLIArgs): string[] {
   const errors: string[] = [];
 
   if (!args.tokenFile) {
@@ -173,4 +173,7 @@ async function main(): Promise<void> {
   }
 }
 
-main().catch(console.error);
+/* istanbul ignore next */
+if (require.main === module) {
+  main().catch(console.error);
+}

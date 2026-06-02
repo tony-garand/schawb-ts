@@ -1,6 +1,6 @@
 {
   "name": "schwab-ts",
-  "version": "1.5.0",
+  "version": "2.0.0",
   "description": "TypeScript client for the Schwab API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -10,6 +10,7 @@
   "scripts": {
     "build": "tsc",
     "test": "jest",
+    "test:smoke": "node --env-file=.env node_modules/.bin/jest --config jest.smoke.config.js",
     "lint": "eslint . --ext .ts",
     "prepublishOnly": "npm run build && npm test",
     "clean": "rm -rf dist",
@@ -32,7 +33,7 @@
     "prettier": "^3.2.5",
     "ts-jest": "^29.1.2",
     "ts-node": "^10.9.2",
-    "typescript": "latest"
+    "typescript": "^5.8.3"
   },
   "keywords": [
     "schwab",
@@ -61,6 +62,7 @@
   "files": [
     "dist/**/*",
     "README.md",
+    "MIGRATION.md",
     "LICENSE"
   ]
 }

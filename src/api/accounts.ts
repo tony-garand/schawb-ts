@@ -5,41 +5,14 @@ import {
   Position 
 } from '../types';
 import { SchwabOAuth } from '../auth/oauth';
+import { HttpClient } from '../http/httpClient';
+import { getBaseUrl } from '../config/endpoints';
 
 export class AccountsAPI {
-  private oauth: SchwabOAuth;
-  private baseUrl: string;
+  private http: HttpClient;
 
   constructor(oauth: SchwabOAuth, environment: 'sandbox' | 'production' = 'production') {
-    this.oauth = oauth;
-    this.baseUrl = environment === 'sandbox'
-      ? 'https://api.schwabapi.com/v1/sandbox'
-      : 'https://api.schwabapi.com/trader/v1';
-  }
-
-  private async makeRequest(url: string, options: {
-    method?: string;
-    headers?: Record<string, string>;
-    body?: string;
-  } = {}): Promise<unknown> {
-    const authHeader = await this.oauth.getAuthorizationHeader();
-    const response = await fetch(url, {
-      method: options.method || 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': authHeader,
-        // Schwab returns HTTP 400 when Content-Type is sent on a bodyless request,
-        // so only include it when there is a request body.
-        ...(options.body ? { 'Content-Type': 'application/json' } : {}),
-        ...options.headers,
-      },
-      body: options.body,
-    });
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`HTTP ${response.status}: ${errorText}`);
-    }
-    return response.json();
+    this.http = new HttpClient(oauth, getBaseUrl('trader', environment));
   }
 
   /**
@@ -47,8 +20,8 @@ export class AccountsAPI {
    * GET /accounts/accountNumbers
    */
   public async getAccountNumberMappings(): Promise<AccountNumberMapping[]> {
-    const response = await this.makeRequest(
-      `${this.baseUrl}/accounts/accountNumbers`
+    const response = await this.http.request(
+      `/accounts/accountNumbers`
     );
     return response as AccountNumberMapping[];
   }
@@ -59,9 +32,9 @@ export class AccountsAPI {
    */
   public async getAccounts(fields?: string): Promise<Account[]> {
     const url = fields
-      ? `${this.baseUrl}/accounts?fields=${encodeURIComponent(fields)}`
-      : `${this.baseUrl}/accounts`;
-    const response = await this.makeRequest(url);
+      ? `/accounts?fields=${encodeURIComponent(fields)}`
+      : `/accounts`;
+    const response = await this.http.request(url);
     return response as Account[];
   }
 
@@ -71,9 +44,9 @@ export class AccountsAPI {
    */
   public async getAccountByNumber(accountNumber: string, fields?: string): Promise<SecuritiesAccount> {
     const url = fields
-      ? `${this.baseUrl}/accounts/${accountNumber}?fields=${encodeURIComponent(fields)}`
-      : `${this.baseUrl}/accounts/${accountNumber}`;
-    const response = await this.makeRequest(url);
+      ? `/accounts/${accountNumber}?fields=${encodeURIComponent(fields)}`
+      : `/accounts/${accountNumber}`;
+    const response = await this.http.request(url);
     return response as SecuritiesAccount;
   }
 
@@ -81,8 +54,8 @@ export class AccountsAPI {
    * Get account information (legacy, by accountId)
    */
   public async getAccount(accountId: string): Promise<Account> {
-    const response = await this.makeRequest(
-      `${this.baseUrl}/accounts/${accountId}`
+    const response = await this.http.request(
+      `/accounts/${accountId}`
     );
     return response as Account;
   }
@@ -91,8 +64,8 @@ export class AccountsAPI {
    * Get positions for an account
    */
   public async getPositions(accountId: string): Promise<Position[]> {
-    const response = await this.makeRequest(
-      `${this.baseUrl}/accounts/${accountId}/positions`
+    const response = await this.http.request(
+      `/accounts/${accountId}/positions`
     );
     return response as Position[];
   }
@@ -113,8 +86,8 @@ export class AccountsAPI {
     if (options?.frequencyType) params.append('frequencyType', options.frequencyType);
     if (options?.frequency) params.append('frequency', options.frequency.toString());
     if (options?.needExtendedHoursData) params.append('needExtendedHoursData', options.needExtendedHoursData.toString());
-    const response = await this.makeRequest(
-      `${this.baseUrl}/accounts/${accountId}/history?${params.toString()}`
+    const response = await this.http.request(
+      `/accounts/${accountId}/history?${params.toString()}`
     );
     return response;
   }

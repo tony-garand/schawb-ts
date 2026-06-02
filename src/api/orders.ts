@@ -1,5 +1,7 @@
 import { Commission, ComplexOrderStrategyType, Fees, Order, OrderResponse, OrderValidationDetail } from '../types';
 import { SchwabOAuth } from '../auth/oauth';
+import { HttpClient } from '../http/httpClient';
+import { getBaseUrl } from '../config/endpoints';
 
 // Order status types based on Schwab API documentation
 export type OrderStatus = 
@@ -135,47 +137,10 @@ export interface OrderPreviewResponse {
 }
 
 export class OrdersAPI {
-  private oauth: SchwabOAuth;
-  private baseUrl: string;
+  private http: HttpClient;
 
   constructor(oauth: SchwabOAuth, environment: 'sandbox' | 'production' = 'production') {
-    this.oauth = oauth;
-    this.baseUrl = environment === 'sandbox'
-      ? 'https://api.schwabapi.com/v1/sandbox'
-      : 'https://api.schwabapi.com/trader/v1';
-  }
-
-  private async makeRequest(url: string, options: {
-    method?: string;
-    headers?: Record<string, string>;
-    body?: string;
-  } = {}): Promise<unknown> {
-    const authHeader = await this.oauth.getAuthorizationHeader();
-    const response = await fetch(url, {
-      method: options.method || 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': authHeader,
-        // Schwab returns HTTP 400 when Content-Type is sent on a bodyless request,
-        // so only include it when there is a request body.
-        ...(options.body ? { 'Content-Type': 'application/json' } : {}),
-        ...options.headers,
-      },
-      body: options.body,
-    });
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`HTTP ${response.status}: ${errorText}`);
-    }
-    
-    // Handle empty responses (like for DELETE operations)
-    if (response.status === 200 || response.status === 201) {
-      const text = await response.text();
-      return text ? JSON.parse(text) : null;
-    }
-    
-    return response.json();
+    this.http = new HttpClient(oauth, getBaseUrl('trader', environment));
   }
 
   /**
@@ -203,10 +168,10 @@ export class OrdersAPI {
       queryParams.append('status', params.status);
     }
 
-    const url = `${this.baseUrl}/accounts/${accountNumber}/orders`;
+    const url = `/accounts/${accountNumber}/orders`;
     const fullUrl = queryParams.toString() ? `${url}?${queryParams.toString()}` : url;
     
-    return this.makeRequest(fullUrl) as Promise<OrderExtended[]>;
+    return this.http.request(fullUrl) as Promise<OrderExtended[]>;
   }
 
   /**
@@ -219,8 +184,8 @@ export class OrdersAPI {
     accountNumber: string, 
     order: Order
   ): Promise<OrderResponse> {
-    const response = await this.makeRequest(
-      `${this.baseUrl}/accounts/${accountNumber}/orders`,
+    const response = await this.http.request(
+      `/accounts/${accountNumber}/orders`,
       {
         method: 'POST',
         body: JSON.stringify(order),
@@ -239,8 +204,8 @@ export class OrdersAPI {
     accountNumber: string, 
     orderId: number
   ): Promise<OrderExtended> {
-    return this.makeRequest(
-      `${this.baseUrl}/accounts/${accountNumber}/orders/${orderId}`
+    return this.http.request(
+      `/accounts/${accountNumber}/orders/${orderId}`
     ) as Promise<OrderExtended>;
   }
 
@@ -254,8 +219,8 @@ export class OrdersAPI {
     accountNumber: string, 
     orderId: number
   ): Promise<void> {
-    await this.makeRequest(
-      `${this.baseUrl}/accounts/${accountNumber}/orders/${orderId}`,
+    await this.http.request(
+      `/accounts/${accountNumber}/orders/${orderId}`,
       { method: 'DELETE' }
     );
   }
@@ -272,8 +237,8 @@ export class OrdersAPI {
     orderId: number, 
     newOrder: Order
   ): Promise<OrderResponse> {
-    const response = await this.makeRequest(
-      `${this.baseUrl}/accounts/${accountNumber}/orders/${orderId}`,
+    const response = await this.http.request(
+      `/accounts/${accountNumber}/orders/${orderId}`,
       {
         method: 'PUT',
         body: JSON.stringify(newOrder),
@@ -303,10 +268,10 @@ export class OrdersAPI {
       queryParams.append('status', params.status);
     }
 
-    const url = `${this.baseUrl}/orders`;
+    const url = `/orders`;
     const fullUrl = queryParams.toString() ? `${url}?${queryParams.toString()}` : url;
     
-    return this.makeRequest(fullUrl) as Promise<OrderExtended[]>;
+    return this.http.request(fullUrl) as Promise<OrderExtended[]>;
   }
 
   /**
@@ -319,8 +284,8 @@ export class OrdersAPI {
     accountNumber: string, 
     order: Order
   ): Promise<OrderPreviewResponse> {
-    return this.makeRequest(
-      `${this.baseUrl}/accounts/${accountNumber}/previewOrder`,
+    return this.http.request(
+      `/accounts/${accountNumber}/previewOrder`,
       {
         method: 'POST',
         body: JSON.stringify(order),

@@ -1,4 +1,6 @@
 import { SchwabOAuth } from '../auth/oauth';
+import { HttpClient } from '../http/httpClient';
+import { getBaseUrl } from '../config/endpoints';
 import {
   // Quote types
   QuoteResponse,
@@ -188,48 +190,10 @@ export type Mover = Screener;
 export type { QuoteResponse } from '../types/schemas';
 
 export class MarketDataAPI {
-  private oauth: SchwabOAuth;
-  private baseUrl: string;
+  private http: HttpClient;
 
   constructor(oauth: SchwabOAuth, environment: 'sandbox' | 'production' = 'production') {
-    this.oauth = oauth;
-    this.baseUrl =
-      environment === 'sandbox'
-        ? 'https://api-sandbox.schwab.com/marketdata/v1'
-        : 'https://api.schwabapi.com/marketdata/v1';
-  }
-
-  private async makeRequest(
-    url: string,
-    options: {
-      method?: string;
-      headers?: Record<string, string>;
-      body?: string;
-    } = {}
-  ): Promise<unknown> {
-    const tokens = this.oauth.getTokens();
-    if (!tokens?.access_token) {
-      throw new Error('No valid access token available');
-    }
-
-    const response = await fetch(url, {
-      method: options.method || 'GET',
-      headers: {
-        'Accept': 'application/json',
-        Authorization: `Bearer ${tokens.access_token}`,
-        // Schwab returns HTTP 400 when Content-Type is sent on a bodyless request,
-        // so only include it when there is a request body.
-        ...(options.body ? { 'Content-Type': 'application/json' } : {}),
-        ...options.headers,
-      },
-      body: options.body,
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`HTTP ${response.status}: ${errorText}`);
-    }
-    return response.json();
+    this.http = new HttpClient(oauth, getBaseUrl('marketData', environment));
   }
 
   /**
@@ -253,8 +217,8 @@ export class MarketDataAPI {
       queryParams.append('indicative', params.indicative.toString());
     }
 
-    const url = `${this.baseUrl}/quotes?${queryParams.toString()}`;
-    const response = await this.makeRequest(url);
+    const url = `/quotes?${queryParams.toString()}`;
+    const response = await this.http.request(url);
     return response as QuoteResponse;
   }
 
@@ -273,8 +237,8 @@ export class MarketDataAPI {
       queryParams.append('fields', fields);
     }
 
-    const url = `${this.baseUrl}/${encodeURIComponent(symbolId)}/quotes?${queryParams.toString()}`;
-    const response = await this.makeRequest(url);
+    const url = `/${encodeURIComponent(symbolId)}/quotes?${queryParams.toString()}`;
+    const response = await this.http.request(url);
     return response as QuoteResponseObject;
   }
 
@@ -313,8 +277,8 @@ export class MarketDataAPI {
         queryParams.append(key, String(value));
       }
     });
-    const url = `${this.baseUrl}/chains?${queryParams.toString()}`;
-    const response = await this.makeRequest(url);
+    const url = `/chains?${queryParams.toString()}`;
+    const response = await this.http.request(url);
     return response as OptionChain;
   }
 
@@ -325,8 +289,8 @@ export class MarketDataAPI {
    * @returns Promise<ExpirationChain>
    */
   public async getOptionExpirationChain(symbol: string): Promise<ExpirationChain> {
-    const url = `${this.baseUrl}/expirationchain?symbol=${encodeURIComponent(symbol)}`;
-    const response = await this.makeRequest(url);
+    const url = `/expirationchain?symbol=${encodeURIComponent(symbol)}`;
+    const response = await this.http.request(url);
     return response as ExpirationChain;
   }
 
@@ -375,8 +339,8 @@ export class MarketDataAPI {
       queryParams.append('needPreviousClose', params.needPreviousClose.toString());
     }
 
-    const url = `${this.baseUrl}/pricehistory?${queryParams.toString()}`;
-    const response = await this.makeRequest(url);
+    const url = `/pricehistory?${queryParams.toString()}`;
+    const response = await this.http.request(url);
     return response as CandleList;
   }
 
@@ -426,8 +390,8 @@ export class MarketDataAPI {
       queryParams.append('frequency', params.frequency.toString());
     }
 
-    const url = `${this.baseUrl}/movers/${encodeURIComponent(params.symbolId)}?${queryParams.toString()}`;
-    const response = await this.makeRequest(url);
+    const url = `/movers/${encodeURIComponent(params.symbolId)}?${queryParams.toString()}`;
+    const response = await this.http.request(url);
     return response as MoversResponse;
   }
 
@@ -467,8 +431,8 @@ export class MarketDataAPI {
       queryParams.append('date', params.date);
     }
 
-    const url = `${this.baseUrl}/markets?${queryParams.toString()}`;
-    const response = await this.makeRequest(url);
+    const url = `/markets?${queryParams.toString()}`;
+    const response = await this.http.request(url);
     return response as MarketHoursResponse;
   }
 
@@ -489,8 +453,8 @@ export class MarketDataAPI {
       queryParams.append('date', date);
     }
 
-    const url = `${this.baseUrl}/markets/${encodeURIComponent(marketId)}?${queryParams.toString()}`;
-    const response = await this.makeRequest(url);
+    const url = `/markets/${encodeURIComponent(marketId)}?${queryParams.toString()}`;
+    const response = await this.http.request(url);
     return response as MarketHoursResponse;
   }
 
@@ -520,8 +484,8 @@ export class MarketDataAPI {
     queryParams.append('symbol', params.symbol);
     queryParams.append('projection', params.projection);
 
-    const url = `${this.baseUrl}/instruments?${queryParams.toString()}`;
-    const response = await this.makeRequest(url);
+    const url = `/instruments?${queryParams.toString()}`;
+    const response = await this.http.request(url);
     return response as InstrumentsResponse;
   }
 
@@ -532,8 +496,8 @@ export class MarketDataAPI {
    * @returns Promise<Instrument>
    */
   public async getInstrumentByCusip(cusipId: string): Promise<Instrument> {
-    const url = `${this.baseUrl}/instruments/${encodeURIComponent(cusipId)}`;
-    const response = await this.makeRequest(url);
+    const url = `/instruments/${encodeURIComponent(cusipId)}`;
+    const response = await this.http.request(url);
     return response as Instrument;
   }
 
@@ -562,6 +526,44 @@ export class MarketDataAPI {
   // ==================== Price History Convenience Methods ====================
 
   /**
+   * Shared builder for the period-based price-history convenience methods below.
+   * Normalizes optional Date|epoch bounds and applies a default period when no
+   * explicit date range is given.
+   */
+  private buildPeriodPriceHistory(
+    symbol: string,
+    config: {
+      periodType: PeriodType;
+      frequencyType: FrequencyType;
+      frequency: number;
+      defaultPeriod: number;
+    },
+    startDate?: number | Date,
+    endDate?: number | Date,
+    needExtendedHoursData: boolean = true
+  ): Promise<CandleList> {
+    const params: PriceHistoryRequestParams = {
+      symbol,
+      periodType: config.periodType,
+      frequencyType: config.frequencyType,
+      frequency: config.frequency,
+      needExtendedHoursData,
+    };
+
+    if (startDate) {
+      params.startDate = typeof startDate === 'number' ? startDate : startDate.getTime();
+    }
+    if (endDate) {
+      params.endDate = typeof endDate === 'number' ? endDate : endDate.getTime();
+    }
+    if (!startDate && !endDate) {
+      params.period = config.defaultPeriod;
+    }
+
+    return this.getPriceHistory(params);
+  }
+
+  /**
    * Get price history with minute-by-minute data
    *
    * Returns data for up to 48 days (35 days if extended hours data is included)
@@ -578,27 +580,13 @@ export class MarketDataAPI {
     endDate?: number | Date,
     needExtendedHoursData: boolean = true
   ): Promise<CandleList> {
-    const params: PriceHistoryRequestParams = {
+    return this.buildPeriodPriceHistory(
       symbol,
-      periodType: 'day',
-      frequencyType: 'minute',
-      frequency: 1,
-      needExtendedHoursData,
-    };
-
-    if (startDate) {
-      params.startDate = typeof startDate === 'number' ? startDate : startDate.getTime();
-    }
-    if (endDate) {
-      params.endDate = typeof endDate === 'number' ? endDate : endDate.getTime();
-    }
-
-    // Default to 10 days if no date range specified
-    if (!startDate && !endDate) {
-      params.period = 10;
-    }
-
-    return this.getPriceHistory(params);
+      { periodType: 'day', frequencyType: 'minute', frequency: 1, defaultPeriod: 10 },
+      startDate,
+      endDate,
+      needExtendedHoursData
+    );
   }
 
   /**
@@ -618,26 +606,13 @@ export class MarketDataAPI {
     endDate?: number | Date,
     needExtendedHoursData: boolean = true
   ): Promise<CandleList> {
-    const params: PriceHistoryRequestParams = {
+    return this.buildPeriodPriceHistory(
       symbol,
-      periodType: 'day',
-      frequencyType: 'minute',
-      frequency: 5,
-      needExtendedHoursData,
-    };
-
-    if (startDate) {
-      params.startDate = typeof startDate === 'number' ? startDate : startDate.getTime();
-    }
-    if (endDate) {
-      params.endDate = typeof endDate === 'number' ? endDate : endDate.getTime();
-    }
-
-    if (!startDate && !endDate) {
-      params.period = 10;
-    }
-
-    return this.getPriceHistory(params);
+      { periodType: 'day', frequencyType: 'minute', frequency: 5, defaultPeriod: 10 },
+      startDate,
+      endDate,
+      needExtendedHoursData
+    );
   }
 
   /**
@@ -655,26 +630,13 @@ export class MarketDataAPI {
     endDate?: number | Date,
     needExtendedHoursData: boolean = true
   ): Promise<CandleList> {
-    const params: PriceHistoryRequestParams = {
+    return this.buildPeriodPriceHistory(
       symbol,
-      periodType: 'day',
-      frequencyType: 'minute',
-      frequency: 10,
-      needExtendedHoursData,
-    };
-
-    if (startDate) {
-      params.startDate = typeof startDate === 'number' ? startDate : startDate.getTime();
-    }
-    if (endDate) {
-      params.endDate = typeof endDate === 'number' ? endDate : endDate.getTime();
-    }
-
-    if (!startDate && !endDate) {
-      params.period = 10;
-    }
-
-    return this.getPriceHistory(params);
+      { periodType: 'day', frequencyType: 'minute', frequency: 10, defaultPeriod: 10 },
+      startDate,
+      endDate,
+      needExtendedHoursData
+    );
   }
 
   /**
@@ -692,26 +654,13 @@ export class MarketDataAPI {
     endDate?: number | Date,
     needExtendedHoursData: boolean = true
   ): Promise<CandleList> {
-    const params: PriceHistoryRequestParams = {
+    return this.buildPeriodPriceHistory(
       symbol,
-      periodType: 'day',
-      frequencyType: 'minute',
-      frequency: 15,
-      needExtendedHoursData,
-    };
-
-    if (startDate) {
-      params.startDate = typeof startDate === 'number' ? startDate : startDate.getTime();
-    }
-    if (endDate) {
-      params.endDate = typeof endDate === 'number' ? endDate : endDate.getTime();
-    }
-
-    if (!startDate && !endDate) {
-      params.period = 10;
-    }
-
-    return this.getPriceHistory(params);
+      { periodType: 'day', frequencyType: 'minute', frequency: 15, defaultPeriod: 10 },
+      startDate,
+      endDate,
+      needExtendedHoursData
+    );
   }
 
   /**
@@ -729,26 +678,13 @@ export class MarketDataAPI {
     endDate?: number | Date,
     needExtendedHoursData: boolean = true
   ): Promise<CandleList> {
-    const params: PriceHistoryRequestParams = {
+    return this.buildPeriodPriceHistory(
       symbol,
-      periodType: 'day',
-      frequencyType: 'minute',
-      frequency: 30,
-      needExtendedHoursData,
-    };
-
-    if (startDate) {
-      params.startDate = typeof startDate === 'number' ? startDate : startDate.getTime();
-    }
-    if (endDate) {
-      params.endDate = typeof endDate === 'number' ? endDate : endDate.getTime();
-    }
-
-    if (!startDate && !endDate) {
-      params.period = 10;
-    }
-
-    return this.getPriceHistory(params);
+      { periodType: 'day', frequencyType: 'minute', frequency: 30, defaultPeriod: 10 },
+      startDate,
+      endDate,
+      needExtendedHoursData
+    );
   }
 
   /**
@@ -768,26 +704,13 @@ export class MarketDataAPI {
     endDate?: number | Date,
     needExtendedHoursData: boolean = true
   ): Promise<CandleList> {
-    const params: PriceHistoryRequestParams = {
+    return this.buildPeriodPriceHistory(
       symbol,
-      periodType: 'year',
-      frequencyType: 'daily',
-      frequency: 1,
-      needExtendedHoursData,
-    };
-
-    if (startDate) {
-      params.startDate = typeof startDate === 'number' ? startDate : startDate.getTime();
-    }
-    if (endDate) {
-      params.endDate = typeof endDate === 'number' ? endDate : endDate.getTime();
-    }
-
-    if (!startDate && !endDate) {
-      params.period = 20; // 20 years of daily data
-    }
-
-    return this.getPriceHistory(params);
+      { periodType: 'year', frequencyType: 'daily', frequency: 1, defaultPeriod: 20 },
+      startDate,
+      endDate,
+      needExtendedHoursData
+    );
   }
 
   /**
@@ -807,25 +730,12 @@ export class MarketDataAPI {
     endDate?: number | Date,
     needExtendedHoursData: boolean = true
   ): Promise<CandleList> {
-    const params: PriceHistoryRequestParams = {
+    return this.buildPeriodPriceHistory(
       symbol,
-      periodType: 'year',
-      frequencyType: 'weekly',
-      frequency: 1,
-      needExtendedHoursData,
-    };
-
-    if (startDate) {
-      params.startDate = typeof startDate === 'number' ? startDate : startDate.getTime();
-    }
-    if (endDate) {
-      params.endDate = typeof endDate === 'number' ? endDate : endDate.getTime();
-    }
-
-    if (!startDate && !endDate) {
-      params.period = 20; // 20 years of weekly data
-    }
-
-    return this.getPriceHistory(params);
+      { periodType: 'year', frequencyType: 'weekly', frequency: 1, defaultPeriod: 20 },
+      startDate,
+      endDate,
+      needExtendedHoursData
+    );
   }
 }

@@ -1,4 +1,6 @@
 import { SchwabOAuth } from '../auth/oauth';
+import { HttpClient } from '../http/httpClient';
+import { getBaseUrl } from '../config/endpoints';
 
 // Transaction types based on Schwab API documentation
 export type TransactionType = 
@@ -96,41 +98,10 @@ export interface Transaction {
 }
 
 export class TransactionsAPI {
-  private oauth: SchwabOAuth;
-  private baseUrl: string;
+  private http: HttpClient;
 
   constructor(oauth: SchwabOAuth, environment: 'sandbox' | 'production' = 'production') {
-    this.oauth = oauth;
-    this.baseUrl = environment === 'sandbox'
-      ? 'https://api.schwabapi.com/v1/sandbox'
-      : 'https://api.schwabapi.com/trader/v1';
-  }
-
-  private async makeRequest(url: string, options: {
-    method?: string;
-    headers?: Record<string, string>;
-    body?: string;
-  } = {}): Promise<unknown> {
-    const authHeader = await this.oauth.getAuthorizationHeader();
-    const response = await fetch(url, {
-      method: options.method || 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': authHeader,
-        // Schwab returns HTTP 400 when Content-Type is sent on a bodyless request,
-        // so only include it when there is a request body.
-        ...(options.body ? { 'Content-Type': 'application/json' } : {}),
-        ...options.headers,
-      },
-      body: options.body,
-    });
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`HTTP ${response.status}: ${errorText}`);
-    }
-    
-    return response.json();
+    this.http = new HttpClient(oauth, getBaseUrl('trader', environment));
   }
 
   /**
@@ -157,10 +128,10 @@ export class TransactionsAPI {
       queryParams.append('types', params.types);
     }
 
-    const url = `${this.baseUrl}/accounts/${accountNumber}/transactions`;
+    const url = `/accounts/${accountNumber}/transactions`;
     const fullUrl = `${url}?${queryParams.toString()}`;
     
-    return this.makeRequest(fullUrl) as Promise<Transaction[]>;
+    return this.http.request(fullUrl) as Promise<Transaction[]>;
   }
 
   /**
@@ -173,8 +144,8 @@ export class TransactionsAPI {
     accountNumber: string, 
     transactionId: number
   ): Promise<Transaction> {
-    return this.makeRequest(
-      `${this.baseUrl}/accounts/${accountNumber}/transactions/${transactionId}`
+    return this.http.request(
+      `/accounts/${accountNumber}/transactions/${transactionId}`
     ) as Promise<Transaction>;
   }
 
