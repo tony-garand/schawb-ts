@@ -526,6 +526,44 @@ export class MarketDataAPI {
   // ==================== Price History Convenience Methods ====================
 
   /**
+   * Shared builder for the period-based price-history convenience methods below.
+   * Normalizes optional Date|epoch bounds and applies a default period when no
+   * explicit date range is given.
+   */
+  private buildPeriodPriceHistory(
+    symbol: string,
+    config: {
+      periodType: PeriodType;
+      frequencyType: FrequencyType;
+      frequency: number;
+      defaultPeriod: number;
+    },
+    startDate?: number | Date,
+    endDate?: number | Date,
+    needExtendedHoursData: boolean = true
+  ): Promise<CandleList> {
+    const params: PriceHistoryRequestParams = {
+      symbol,
+      periodType: config.periodType,
+      frequencyType: config.frequencyType,
+      frequency: config.frequency,
+      needExtendedHoursData,
+    };
+
+    if (startDate) {
+      params.startDate = typeof startDate === 'number' ? startDate : startDate.getTime();
+    }
+    if (endDate) {
+      params.endDate = typeof endDate === 'number' ? endDate : endDate.getTime();
+    }
+    if (!startDate && !endDate) {
+      params.period = config.defaultPeriod;
+    }
+
+    return this.getPriceHistory(params);
+  }
+
+  /**
    * Get price history with minute-by-minute data
    *
    * Returns data for up to 48 days (35 days if extended hours data is included)
@@ -542,27 +580,13 @@ export class MarketDataAPI {
     endDate?: number | Date,
     needExtendedHoursData: boolean = true
   ): Promise<CandleList> {
-    const params: PriceHistoryRequestParams = {
+    return this.buildPeriodPriceHistory(
       symbol,
-      periodType: 'day',
-      frequencyType: 'minute',
-      frequency: 1,
-      needExtendedHoursData,
-    };
-
-    if (startDate) {
-      params.startDate = typeof startDate === 'number' ? startDate : startDate.getTime();
-    }
-    if (endDate) {
-      params.endDate = typeof endDate === 'number' ? endDate : endDate.getTime();
-    }
-
-    // Default to 10 days if no date range specified
-    if (!startDate && !endDate) {
-      params.period = 10;
-    }
-
-    return this.getPriceHistory(params);
+      { periodType: 'day', frequencyType: 'minute', frequency: 1, defaultPeriod: 10 },
+      startDate,
+      endDate,
+      needExtendedHoursData
+    );
   }
 
   /**
@@ -582,26 +606,13 @@ export class MarketDataAPI {
     endDate?: number | Date,
     needExtendedHoursData: boolean = true
   ): Promise<CandleList> {
-    const params: PriceHistoryRequestParams = {
+    return this.buildPeriodPriceHistory(
       symbol,
-      periodType: 'day',
-      frequencyType: 'minute',
-      frequency: 5,
-      needExtendedHoursData,
-    };
-
-    if (startDate) {
-      params.startDate = typeof startDate === 'number' ? startDate : startDate.getTime();
-    }
-    if (endDate) {
-      params.endDate = typeof endDate === 'number' ? endDate : endDate.getTime();
-    }
-
-    if (!startDate && !endDate) {
-      params.period = 10;
-    }
-
-    return this.getPriceHistory(params);
+      { periodType: 'day', frequencyType: 'minute', frequency: 5, defaultPeriod: 10 },
+      startDate,
+      endDate,
+      needExtendedHoursData
+    );
   }
 
   /**
@@ -619,26 +630,13 @@ export class MarketDataAPI {
     endDate?: number | Date,
     needExtendedHoursData: boolean = true
   ): Promise<CandleList> {
-    const params: PriceHistoryRequestParams = {
+    return this.buildPeriodPriceHistory(
       symbol,
-      periodType: 'day',
-      frequencyType: 'minute',
-      frequency: 10,
-      needExtendedHoursData,
-    };
-
-    if (startDate) {
-      params.startDate = typeof startDate === 'number' ? startDate : startDate.getTime();
-    }
-    if (endDate) {
-      params.endDate = typeof endDate === 'number' ? endDate : endDate.getTime();
-    }
-
-    if (!startDate && !endDate) {
-      params.period = 10;
-    }
-
-    return this.getPriceHistory(params);
+      { periodType: 'day', frequencyType: 'minute', frequency: 10, defaultPeriod: 10 },
+      startDate,
+      endDate,
+      needExtendedHoursData
+    );
   }
 
   /**
@@ -656,26 +654,13 @@ export class MarketDataAPI {
     endDate?: number | Date,
     needExtendedHoursData: boolean = true
   ): Promise<CandleList> {
-    const params: PriceHistoryRequestParams = {
+    return this.buildPeriodPriceHistory(
       symbol,
-      periodType: 'day',
-      frequencyType: 'minute',
-      frequency: 15,
-      needExtendedHoursData,
-    };
-
-    if (startDate) {
-      params.startDate = typeof startDate === 'number' ? startDate : startDate.getTime();
-    }
-    if (endDate) {
-      params.endDate = typeof endDate === 'number' ? endDate : endDate.getTime();
-    }
-
-    if (!startDate && !endDate) {
-      params.period = 10;
-    }
-
-    return this.getPriceHistory(params);
+      { periodType: 'day', frequencyType: 'minute', frequency: 15, defaultPeriod: 10 },
+      startDate,
+      endDate,
+      needExtendedHoursData
+    );
   }
 
   /**
@@ -693,26 +678,13 @@ export class MarketDataAPI {
     endDate?: number | Date,
     needExtendedHoursData: boolean = true
   ): Promise<CandleList> {
-    const params: PriceHistoryRequestParams = {
+    return this.buildPeriodPriceHistory(
       symbol,
-      periodType: 'day',
-      frequencyType: 'minute',
-      frequency: 30,
-      needExtendedHoursData,
-    };
-
-    if (startDate) {
-      params.startDate = typeof startDate === 'number' ? startDate : startDate.getTime();
-    }
-    if (endDate) {
-      params.endDate = typeof endDate === 'number' ? endDate : endDate.getTime();
-    }
-
-    if (!startDate && !endDate) {
-      params.period = 10;
-    }
-
-    return this.getPriceHistory(params);
+      { periodType: 'day', frequencyType: 'minute', frequency: 30, defaultPeriod: 10 },
+      startDate,
+      endDate,
+      needExtendedHoursData
+    );
   }
 
   /**
@@ -732,26 +704,13 @@ export class MarketDataAPI {
     endDate?: number | Date,
     needExtendedHoursData: boolean = true
   ): Promise<CandleList> {
-    const params: PriceHistoryRequestParams = {
+    return this.buildPeriodPriceHistory(
       symbol,
-      periodType: 'year',
-      frequencyType: 'daily',
-      frequency: 1,
-      needExtendedHoursData,
-    };
-
-    if (startDate) {
-      params.startDate = typeof startDate === 'number' ? startDate : startDate.getTime();
-    }
-    if (endDate) {
-      params.endDate = typeof endDate === 'number' ? endDate : endDate.getTime();
-    }
-
-    if (!startDate && !endDate) {
-      params.period = 20; // 20 years of daily data
-    }
-
-    return this.getPriceHistory(params);
+      { periodType: 'year', frequencyType: 'daily', frequency: 1, defaultPeriod: 20 },
+      startDate,
+      endDate,
+      needExtendedHoursData
+    );
   }
 
   /**
@@ -771,25 +730,12 @@ export class MarketDataAPI {
     endDate?: number | Date,
     needExtendedHoursData: boolean = true
   ): Promise<CandleList> {
-    const params: PriceHistoryRequestParams = {
+    return this.buildPeriodPriceHistory(
       symbol,
-      periodType: 'year',
-      frequencyType: 'weekly',
-      frequency: 1,
-      needExtendedHoursData,
-    };
-
-    if (startDate) {
-      params.startDate = typeof startDate === 'number' ? startDate : startDate.getTime();
-    }
-    if (endDate) {
-      params.endDate = typeof endDate === 'number' ? endDate : endDate.getTime();
-    }
-
-    if (!startDate && !endDate) {
-      params.period = 20; // 20 years of weekly data
-    }
-
-    return this.getPriceHistory(params);
+      { periodType: 'year', frequencyType: 'weekly', frequency: 1, defaultPeriod: 20 },
+      startDate,
+      endDate,
+      needExtendedHoursData
+    );
   }
 }

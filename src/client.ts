@@ -1,5 +1,4 @@
 import { SchwabOAuth } from './auth/oauth';
-import { SchwabTradingAPI } from './api/trading';
 import { AccountsAPI } from './api/accounts';
 import { OrdersAPI, OrderQueryParams, OrderExtended, OrderPreviewResponse } from './api/orders';
 import { TransactionsAPI, TransactionQueryParams, Transaction, TransactionType } from './api/transactions';
@@ -13,8 +12,6 @@ import {
   OrderResponse,
   Account,
   Position,
-  Quote,
-  MarketHours,
   AccountNumberMapping,
   SecuritiesAccount
 } from './types';
@@ -27,7 +24,6 @@ export class SchwabClient {
   public transactions: TransactionsAPI;
   public userPreference: UserPreferenceAPI;
   public marketData: MarketDataAPI;
-  private tradingAPI: SchwabTradingAPI;
   private config: SchwabClientConfig;
 
   constructor(config: SchwabClientConfig) {
@@ -40,7 +36,6 @@ export class SchwabClient {
     };
 
     this.oauth = new SchwabOAuth(oauthConfig);
-    this.tradingAPI = new SchwabTradingAPI(this.oauth, config.environment);
     this.accounts = new AccountsAPI(this.oauth, config.environment);
     this.orders = new OrdersAPI(this.oauth, config.environment);
     this.transactions = new TransactionsAPI(this.oauth, config.environment);
@@ -202,8 +197,8 @@ export class SchwabClient {
    * @param symbol Stock or option symbol
    * @returns Promise with quote data
    */
-  public async getQuote(symbol: string): Promise<Quote> {
-    return this.tradingAPI.getQuote(symbol);
+  public async getQuote(symbol: string): Promise<MarketDataQuote> {
+    return this.marketData.getQuoteBySymbol(symbol);
   }
 
   /**
@@ -211,8 +206,8 @@ export class SchwabClient {
    * @param symbols Array of symbols
    * @returns Promise with quotes data
    */
-  public async getQuotes(symbols: string[]): Promise<Quote[]> {
-    return this.tradingAPI.getQuotes(symbols);
+  public async getQuotes(symbols: string[]): Promise<QuoteResponse> {
+    return this.marketData.getQuotesForSymbols(symbols);
   }
 
   // Market Data API Methods
@@ -257,8 +252,8 @@ export class SchwabClient {
    * @param market Market type (e.g., 'EQUITY', 'OPTION')
    * @returns Promise with market hours
    */
-  public async getMarketHours(date: string, market: string = 'EQUITY'): Promise<MarketHours> {
-    return this.tradingAPI.getMarketHours(date, market);
+  public async getMarketHours(date: string, market: string = 'EQUITY'): Promise<MarketHoursResponse> {
+    return this.marketData.getMarketHoursForMarkets([market as MarketType], date);
   }
 
   /**
@@ -267,17 +262,17 @@ export class SchwabClient {
    * @param projection Search projection type
    * @returns Promise with search results
    */
-  public async searchInstruments(symbol: string, projection: string = 'symbol-search'): Promise<unknown[]> {
-    return this.tradingAPI.searchInstruments(symbol, projection);
+  public async searchInstruments(symbol: string, projection: string = 'symbol-search'): Promise<InstrumentsResponse> {
+    return this.marketData.searchInstruments(symbol, projection as InstrumentProjection);
   }
 
   /**
-   * Get instrument details
-   * @param symbol Symbol to get details for
+   * Get instrument details by CUSIP / instrument id
+   * @param cusipId The CUSIP (or instrument id) to look up
    * @returns Promise with instrument details
    */
-  public async getInstrument(symbol: string): Promise<unknown> {
-    return this.tradingAPI.getInstrument(symbol);
+  public async getInstrument(cusipId: string): Promise<Instrument> {
+    return this.marketData.getInstrumentByCusip(cusipId);
   }
 
   /**

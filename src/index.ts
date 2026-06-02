@@ -29,9 +29,6 @@ export {
 } from './auth/easyAuth';
 export type { EasyClientOptions, LoginFlowOptions, TokenFileData } from './auth/easyAuth';
 
-// Trading API
-export { SchwabTradingAPI } from './api/trading';
-
 // Streaming Client
 export { StreamClient } from './streaming/streamClient';
 export {
