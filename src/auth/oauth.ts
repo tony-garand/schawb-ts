@@ -7,6 +7,9 @@ export class SchwabOAuth {
   private config: OAuthConfig;
   private tokens: OAuthTokens | null = null;
   private tokenExpiryTime: number = 0;
+  // Coalesces concurrent refreshes: when many requests find an expired token at
+  // once, they all await this single in-flight refresh instead of each firing one.
+  private refreshPromise: Promise<OAuthTokens> | null = null;
 
   constructor(config: OAuthConfig) {
     this.config = config;
@@ -139,7 +142,12 @@ export class SchwabOAuth {
 
     // Check if token is expired or will expire in the next 5 minutes
     if (Date.now() >= this.tokenExpiryTime - 300000) {
-      await this.refreshTokens();
+      if (!this.refreshPromise) {
+        this.refreshPromise = this.refreshTokens().finally(() => {
+          this.refreshPromise = null;
+        });
+      }
+      await this.refreshPromise;
     }
 
     return this.tokens.access_token;

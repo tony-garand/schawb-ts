@@ -1,4 +1,6 @@
 import { SchwabOAuth } from '../auth/oauth';
+import { HttpClient } from '../http/httpClient';
+import { getBaseUrl } from '../config/endpoints';
 
 // Account preference types
 export interface AccountPreference {
@@ -34,41 +36,10 @@ export interface UserPreference {
 }
 
 export class UserPreferenceAPI {
-  private oauth: SchwabOAuth;
-  private baseUrl: string;
+  private http: HttpClient;
 
   constructor(oauth: SchwabOAuth, environment: 'sandbox' | 'production' = 'production') {
-    this.oauth = oauth;
-    this.baseUrl = environment === 'sandbox'
-      ? 'https://api.schwabapi.com/v1/sandbox'
-      : 'https://api.schwabapi.com/trader/v1';
-  }
-
-  private async makeRequest(url: string, options: {
-    method?: string;
-    headers?: Record<string, string>;
-    body?: string;
-  } = {}): Promise<unknown> {
-    const authHeader = await this.oauth.getAuthorizationHeader();
-    const response = await fetch(url, {
-      method: options.method || 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': authHeader,
-        // Schwab returns HTTP 400 when Content-Type is sent on a bodyless request,
-        // so only include it when there is a request body.
-        ...(options.body ? { 'Content-Type': 'application/json' } : {}),
-        ...options.headers,
-      },
-      body: options.body,
-    });
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`HTTP ${response.status}: ${errorText}`);
-    }
-    
-    return response.json();
+    this.http = new HttpClient(oauth, getBaseUrl('trader', environment));
   }
 
   /**
@@ -76,7 +47,7 @@ export class UserPreferenceAPI {
    * @returns Promise with user preference data
    */
   public async getUserPreferences(): Promise<UserPreference[]> {
-    return this.makeRequest(`${this.baseUrl}/userPreference`) as Promise<UserPreference[]>;
+    return this.http.request(`/userPreference`) as Promise<UserPreference[]>;
   }
 
   /**

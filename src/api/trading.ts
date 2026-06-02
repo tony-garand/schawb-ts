@@ -3,47 +3,18 @@ import {
   MarketHours
 } from '../types';
 import { SchwabOAuth } from '../auth/oauth';
+import { HttpClient } from '../http/httpClient';
 
 export class SchwabTradingAPI {
-  private oauth: SchwabOAuth;
-  private baseUrl: string;
+  private http: HttpClient;
 
   constructor(oauth: SchwabOAuth, environment: 'sandbox' | 'production' = 'production') {
-    this.oauth = oauth;
-    this.baseUrl = environment === 'sandbox'
-      ? 'https://api.schwabapi.com/v1/sandbox'
-      : 'https://api.schwabapi.com/marketdata/v1';
-  }
-
-  /**
-   * Make HTTP request using native fetch API
-   */
-  private async makeRequest(url: string, options: {
-    method?: string;
-    headers?: Record<string, string>;
-    body?: string;
-  } = {}): Promise<unknown> {
-    const authHeader = await this.oauth.getAuthorizationHeader();
-    
-    const response = await fetch(url, {
-      method: options.method || 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': authHeader,
-        // Schwab returns HTTP 400 when Content-Type is sent on a bodyless request,
-        // so only include it when there is a request body.
-        ...(options.body ? { 'Content-Type': 'application/json' } : {}),
-        ...options.headers,
-      },
-      body: options.body,
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`HTTP ${response.status}: ${errorText}`);
-    }
-
-    return response.json();
+    this.http = new HttpClient(
+      oauth,
+      environment === 'sandbox'
+        ? 'https://api.schwabapi.com/v1/sandbox'
+        : 'https://api.schwabapi.com/marketdata/v1'
+    );
   }
 
   /**
@@ -53,8 +24,8 @@ export class SchwabTradingAPI {
    */
   public async getQuote(symbol: string): Promise<Quote> {
     try {
-      const response = await this.makeRequest(
-        `${this.baseUrl}/${encodeURIComponent(symbol)}/quotes`
+      const response = await this.http.request(
+        `/${encodeURIComponent(symbol)}/quotes`
       );
       return response as Quote;
     } catch (error) {
@@ -69,8 +40,8 @@ export class SchwabTradingAPI {
    */
   public async getQuotes(symbols: string[]): Promise<Quote[]> {
     try {
-      const response = await this.makeRequest(
-        `${this.baseUrl}/quotes?symbols=${symbols.join(',')}`
+      const response = await this.http.request(
+        `/quotes?symbols=${symbols.join(',')}`
       );
       return response as Quote[];
     } catch (error) {
@@ -86,8 +57,8 @@ export class SchwabTradingAPI {
    */
   public async getMarketHours(date: string, market: string = 'EQUITY'): Promise<MarketHours> {
     try {
-      const response = await this.makeRequest(
-        `${this.baseUrl}/markets?markets=${market.toLowerCase()}&date=${date}`
+      const response = await this.http.request(
+        `/markets?markets=${market.toLowerCase()}&date=${date}`
       );
       return response as MarketHours;
     } catch (error) {
@@ -103,8 +74,8 @@ export class SchwabTradingAPI {
    */
   public async searchInstruments(symbol: string, projection: string = 'symbol-search'): Promise<unknown[]> {
     try {
-      const response = await this.makeRequest(
-        `${this.baseUrl}/instruments?symbol=${symbol}&projection=${projection}`
+      const response = await this.http.request(
+        `/instruments?symbol=${symbol}&projection=${projection}`
       );
       return response as unknown[];
     } catch (error) {
@@ -119,8 +90,8 @@ export class SchwabTradingAPI {
    */
   public async getInstrument(symbol: string): Promise<unknown> {
     try {
-      const response = await this.makeRequest(
-        `${this.baseUrl}/instruments/${symbol}`
+      const response = await this.http.request(
+        `/instruments/${symbol}`
       );
       return response;
     } catch (error) {

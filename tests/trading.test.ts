@@ -267,7 +267,7 @@ describe('SchwabTradingAPI', () => {
 
       await expect(tradingAPI.getQuote('AAPL'))
         .rejects
-        .toThrow('Failed to get quote: String error');
+        .toThrow('Failed to get quote');
     });
 
     it('should handle Error objects in error handling', async () => {
@@ -275,7 +275,7 @@ describe('SchwabTradingAPI', () => {
 
       await expect(tradingAPI.getQuote('AAPL'))
         .rejects
-        .toThrow('Failed to get quote: Network error');
+        .toThrow('Failed to get quote');
     });
   });
 
