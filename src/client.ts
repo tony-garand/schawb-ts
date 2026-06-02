@@ -1,9 +1,9 @@
 import { SchwabOAuth } from './auth/oauth';
 import { SchwabTradingAPI } from './api/trading';
 import { AccountsAPI } from './api/accounts';
-import { OrdersAPI, OrderQueryParams } from './api/orders';
+import { OrdersAPI, OrderQueryParams, OrderExtended, OrderPreviewResponse } from './api/orders';
 import { TransactionsAPI, TransactionQueryParams, Transaction, TransactionType } from './api/transactions';
-import { UserPreferenceAPI } from './api/userPreference';
+import { UserPreferenceAPI, AccountPreference, StreamerInfo, Offer, UserPreference } from './api/userPreference';
 import { MarketDataAPI, QuoteRequestParams, QuoteResponse, MarketDataQuote, OptionChainRequestParams, OptionChainResponse, OptionExpirationChainResponse, PriceHistoryRequestParams, PriceHistoryResponse, PeriodType, FrequencyType, MoversResponse, MarketHoursRequestParams, MarketHoursResponse, MarketType, MoversRequestParams, MoversSymbolId, MoversSort, MoversFrequency, InstrumentsRequestParams, InstrumentsResponse, Instrument, InstrumentProjection } from './api/marketData';
 import { 
   SchwabClientConfig, 
@@ -125,7 +125,7 @@ export class SchwabClient {
    * @param accountNumber Account number
    * @returns Promise with order details
    */
-  public async getOrder(orderId: number, accountNumber: string): Promise<unknown> {
+  public async getOrder(orderId: number, accountNumber: string): Promise<OrderExtended> {
     return this.orders.getOrder(accountNumber, orderId);
   }
 
@@ -156,7 +156,7 @@ export class SchwabClient {
    * @param params Query parameters for filtering orders
    * @returns Promise with orders list
    */
-  public async getOrdersForAccount(accountNumber: string, params?: OrderQueryParams): Promise<unknown[]> {
+  public async getOrdersForAccount(accountNumber: string, params?: OrderQueryParams): Promise<OrderExtended[]> {
     return this.orders.getOrdersForAccount(accountNumber, params || {});
   }
 
@@ -165,7 +165,7 @@ export class SchwabClient {
    * @param params Query parameters for filtering orders
    * @returns Promise with orders list
    */
-  public async getAllOrders(params?: OrderQueryParams): Promise<unknown[]> {
+  public async getAllOrders(params?: OrderQueryParams): Promise<OrderExtended[]> {
     return this.orders.getAllOrders(params || {});
   }
 
@@ -175,7 +175,7 @@ export class SchwabClient {
    * @param order Order object to preview
    * @returns Promise with order preview response
    */
-  public async previewOrder(accountNumber: string, order: Order): Promise<unknown> {
+  public async previewOrder(accountNumber: string, order: Order): Promise<OrderPreviewResponse> {
     return this.orders.previewOrder(accountNumber, order);
   }
 
@@ -385,7 +385,7 @@ export class SchwabClient {
    * @param transactionId Transaction ID
    * @returns Promise with transaction details
    */
-  public async getTransaction(accountNumber: string, transactionId: number): Promise<unknown> {
+  public async getTransaction(accountNumber: string, transactionId: number): Promise<Transaction> {
     return this.transactions.getTransaction(accountNumber, transactionId);
   }
 
@@ -402,7 +402,7 @@ export class SchwabClient {
     days: number,
     symbol?: string,
     types?: TransactionType
-  ): Promise<unknown[]> {
+  ): Promise<Transaction[]> {
     return this.transactions.getRecentTransactions(accountNumber, days, symbol, types);
   }
 
@@ -421,7 +421,7 @@ export class SchwabClient {
     month: number,
     symbol?: string,
     types?: TransactionType
-  ): Promise<unknown[]> {
+  ): Promise<Transaction[]> {
     return this.transactions.getTransactionsForMonth(accountNumber, year, month, symbol, types);
   }
 
@@ -438,7 +438,7 @@ export class SchwabClient {
     startDate: Date | string,
     endDate: Date | string,
     symbol?: string
-  ): Promise<unknown[]> {
+  ): Promise<Transaction[]> {
     return this.transactions.getTradeTransactions(accountNumber, startDate, endDate, symbol);
   }
 
@@ -455,7 +455,7 @@ export class SchwabClient {
     startDate: Date | string,
     endDate: Date | string,
     symbol?: string
-  ): Promise<unknown[]> {
+  ): Promise<Transaction[]> {
     return this.transactions.getDividendTransactions(accountNumber, startDate, endDate, symbol);
   }
 
@@ -463,7 +463,7 @@ export class SchwabClient {
    * Get user preference information for the logged in user
    * @returns Promise with user preference data
    */
-  public async getUserPreferences(): Promise<unknown[]> {
+  public async getUserPreferences(): Promise<UserPreference[]> {
     return this.userPreference.getUserPreferences();
   }
 
@@ -471,7 +471,7 @@ export class SchwabClient {
    * Get primary account from user preferences
    * @returns Promise with primary account preference or null
    */
-  public async getPrimaryAccount(): Promise<unknown> {
+  public async getPrimaryAccount(): Promise<AccountPreference | null> {
     return this.userPreference.getPrimaryAccount();
   }
 
@@ -479,7 +479,7 @@ export class SchwabClient {
    * Get all account preferences
    * @returns Promise with array of account preferences
    */
-  public async getAccountPreferences(): Promise<unknown[]> {
+  public async getAccountPreferences(): Promise<AccountPreference[]> {
     return this.userPreference.getAccountPreferences();
   }
 
@@ -488,7 +488,7 @@ export class SchwabClient {
    * @param accountNumber Account number to find
    * @returns Promise with account preference or null
    */
-  public async getAccountPreference(accountNumber: string): Promise<unknown> {
+  public async getAccountPreference(accountNumber: string): Promise<AccountPreference | null> {
     return this.userPreference.getAccountPreference(accountNumber);
   }
 
@@ -496,7 +496,7 @@ export class SchwabClient {
    * Get streamer information
    * @returns Promise with streamer info array
    */
-  public async getStreamerInfo(): Promise<unknown[]> {
+  public async getStreamerInfo(): Promise<StreamerInfo[]> {
     return this.userPreference.getStreamerInfo();
   }
 
@@ -504,7 +504,7 @@ export class SchwabClient {
    * Get offers information
    * @returns Promise with offers array
    */
-  public async getOffers(): Promise<unknown[]> {
+  public async getOffers(): Promise<Offer[]> {
     return this.userPreference.getOffers();
   }
 
@@ -545,7 +545,7 @@ export class SchwabClient {
    * @param type Account type to filter by
    * @returns Promise with filtered account preferences
    */
-  public async getAccountsByType(type: string): Promise<unknown[]> {
+  public async getAccountsByType(type: string): Promise<AccountPreference[]> {
     return this.userPreference.getAccountsByType(type);
   }
 
@@ -553,7 +553,7 @@ export class SchwabClient {
    * Get accounts with auto position effect enabled
    * @returns Promise with accounts that have auto position effect enabled
    */
-  public async getAccountsWithAutoPositionEffect(): Promise<unknown[]> {
+  public async getAccountsWithAutoPositionEffect(): Promise<AccountPreference[]> {
     return this.userPreference.getAccountsWithAutoPositionEffect();
   }
 

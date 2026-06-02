@@ -4,6 +4,17 @@ export { SchwabClient } from './client';
 // OAuth authentication
 export { SchwabOAuth } from './auth/oauth';
 
+// Errors — thrown by all API calls on non-2xx responses / network failures
+export { SchwabApiError } from './errors/SchwabApiError';
+
+// HTTP client (advanced/custom usage)
+export { HttpClient } from './http/httpClient';
+export type { RequestOptions, HttpClientOptions } from './http/httpClient';
+
+// Endpoint configuration
+export { ENDPOINTS, getBaseUrl } from './config/endpoints';
+export type { SchwabEnvironment, SchwabApi } from './config/endpoints';
+
 // Easy authentication (token file management, browser flow, manual flow)
 export {
   easyClient,
