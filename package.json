@@ -10,6 +10,7 @@
   "scripts": {
     "build": "tsc",
     "test": "jest",
+    "test:smoke": "node --env-file=.env node_modules/.bin/jest --config jest.smoke.config.js",
     "lint": "eslint . --ext .ts",
     "prepublishOnly": "npm run build && npm test",
     "clean": "rm -rf dist",
